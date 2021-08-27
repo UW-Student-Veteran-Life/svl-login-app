@@ -1,0 +1,29 @@
+{
+  "name": "svl-be",
+  "version": "1.0.0",
+  "description": "Backend for Student Veteran Life login app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hsingh0825/svl-be.git"
+  },
+  "author": "Harmeet Singh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hsingh0825/svl-be/issues"
+  },
+  "homepage": "https://github.com/hsingh0825/svl-be#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "node": "^16.6.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-google": "^0.14.0",
+    "nodemon": "^2.0.12"
+  }
+}
