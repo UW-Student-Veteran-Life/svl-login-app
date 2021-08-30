@@ -1,5 +1,5 @@
 # Overview
-This API contains implemenation for the the University of Washington's Student Veteran Life log in application.
+This API contains implementation for the the University of Washington's Student Veteran Life log in application.
 
 # API Usage Requirements
 
