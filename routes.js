@@ -2,13 +2,12 @@ const express = require('express');
 const router = express.Router();
 
 router.use(express.json());
-router.use(express.urlencoded({ extended: true }));
 
 // Authorization schema: Basic <credentials>
 // base64 encoding for svl-be:uw123
 const CRED = 'c3ZsLWJlOnV3MTIz';
 
-router.post('/logUser', (req, res, next) => {
+router.post('/logUser', (req, res) => {
   if (!checkAuthHeader(req)) {
     res.status(401).json({'text': 'Authorization credentials are incorrect, please try again.'});
     return;
@@ -20,7 +19,7 @@ router.post('/logUser', (req, res, next) => {
   if (containsAttr(userData,  requiredAttrs)) {
     let now  = new Date();
     userData.timestamp = now.toISOString();
-    userData.text = `User entry successfully recorded for ${userData.name} at ${now.toString()}`;
+    userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
     res.status(200).json(userData);
   } else {
     res.status(400).send({
@@ -40,8 +39,9 @@ function containsAttr(obj, attrs) {
     if(!Object.keys(obj).includes(attr)) {
       return false;
     }
-    return true;
   }
+
+  return true;
 }
 
 /**
