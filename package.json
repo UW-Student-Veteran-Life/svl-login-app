@@ -19,6 +19,7 @@
   "homepage": "https://github.com/hsingh0825/svl-be#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "mongodb": "^4.1.1",
     "node": "^16.6.1"
   },
   "devDependencies": {
