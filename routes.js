@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoDb = require('./db');
 
 router.use(express.json());
 
@@ -15,13 +16,21 @@ router.use((req, res, next) => {
   }
 })
 
-router.post('/logUser', (req, res) => {
+router.post('/logUser', async (req, res) => {
   let userData = req.body;
 
   if (containsAttr(userData, ['name', 'netid', 'sid', 'reason'])) {
     let now  = new Date();
     userData.timestamp = now.toISOString();
     userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
+
+    mongoDb.connect(async (err, db) => {
+      if (err) throw err;
+      let logins = db.db('SVL-Logins').collection('Logins');
+      await logins.insertOne(userData);
+      await mongoDb.close();
+    });
+
     res.status(200).json(userData);
   } else {
     res.status(400).send({
