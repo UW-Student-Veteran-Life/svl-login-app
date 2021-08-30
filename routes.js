@@ -7,16 +7,18 @@ router.use(express.json());
 // base64 encoding for svl-be:uw123
 const CRED = 'c3ZsLWJlOnV3MTIz';
 
-router.post('/logUser', (req, res) => {
+router.use((req, res, next) => {
   if (!checkAuthHeader(req)) {
     res.status(401).json({'text': 'Authorization credentials are incorrect, please try again.'});
-    return;
+  } else {
+    next();
   }
+})
 
+router.post('/logUser', (req, res) => {
   let userData = req.body;
-  let requiredAttrs = ['name', 'netid', 'sid', 'reason']
 
-  if (containsAttr(userData,  requiredAttrs)) {
+  if (containsAttr(userData, ['name', 'netid', 'sid', 'reason'])) {
     let now  = new Date();
     userData.timestamp = now.toISOString();
     userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
