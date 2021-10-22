@@ -76,7 +76,7 @@ function checkAuthHeader(req) {
 function getStudentInfo(reg_id) {
   let searchUrl = new URL("https://wseval.s.uw.edu/student/v5/person");
   let searchParams = searchUrl.searchParams;
-  searchParams.append("reg_id", identifier);
+  searchParams.append("reg_id", reg_id);
 
   fetch(searchUrl)
     .then(res => console.log(res.text()));
