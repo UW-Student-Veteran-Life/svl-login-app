@@ -1,4 +1,6 @@
+const fetch = require('node-fetch');
 const express = require('express');
+const { URL } = require('url');
 const router = express.Router();
 const mongoDb = require('./db');
 
@@ -65,6 +67,19 @@ function checkAuthHeader(req) {
   let authValue = req.headers.authorization;
 
   return (authValue && (authValue === `Basic ${CRED}`));
+}
+
+/**
+ * Gets the student's information for a given a reg_id
+ * @param {string} reg_id The reg_id of the user to log
+ */
+function getStudentInfo(reg_id) {
+  let searchUrl = new URL("https://wseval.s.uw.edu/student/v5/person");
+  let searchParams = searchUrl.searchParams;
+  searchParams.append("reg_id", identifier);
+
+  fetch(searchUrl)
+    .then(res => console.log(res.text()));
 }
 
 module.exports = router;
