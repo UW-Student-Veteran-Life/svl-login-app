@@ -1,1 +1,4 @@
 .eslintrc.json
+certs
+.vscode
+node_modules
