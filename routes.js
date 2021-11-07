@@ -18,6 +18,10 @@ router.use((req, res, next) => {
   }
 })
 
+router.get('/', (req, res) => {
+  res.send('Hello');
+})
+
 router.post('/logUser', async (req, res) => {
   let magStripCode = req.body.magStripCode;
   regId = await getStudentRegId(magStripCode)
