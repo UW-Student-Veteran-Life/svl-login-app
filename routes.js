@@ -1,6 +1,6 @@
-const fetch = require('node-fetch');
+const https = require('https');
+const fs = require('fs');
 const express = require('express');
-const { URL } = require('url');
 const router = express.Router();
 const mongoDb = require('./db');
 
@@ -19,43 +19,49 @@ router.use((req, res, next) => {
 })
 
 router.post('/logUser', async (req, res) => {
-  let userData = req.body;
-
-  if (containsAttr(userData, ['name', 'netid', 'sid', 'reason'])) {
-    let now  = new Date();
-    userData.timestamp = now.toISOString();
-    userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
-
-    mongoDb.connect(async (err, db) => {
-      if (err) throw err;
-      let logins = db.db('SVL-Logins').collection('Logins');
-      await logins.insertOne(userData);
-      await mongoDb.close();
+  let magStripCode = req.body.magStripCode;
+  regId = await getStudentRegId(magStripCode)
+    .catch(err => {
+      console.log(`MagStripCode: ${magStripCode}`);
+      console.log(`Response: ${err}`);
+      res.status(400).json({
+        'text': err
+      });
     });
 
-    res.status(200).json(userData);
-  } else {
-    res.status(400).send({
-      'text': 'Please make sure you include all attributes for this request'
+  if (regId !== undefined) {
+    studentInfo = await getStudentInfo(regId)
+    .catch(err => {
+      console.log(`Reg ID:  ${regId}`);
+      console.log(`Response: ${err}`);
+      res.status(400).json({
+        'text': err
+      });
     });
-  }
-});
 
-/**
- * Checks to see if an object contains all of the keys in a list
- * @param {Object} obj Object to check the keys of
- * @param {Array} attrs List of attributes to check
- * @returns True if object contains all attributes, false otherwise
- */
-function containsAttr(obj, attrs) {
-  for(const attr of attrs) {
-    if(!Object.keys(obj).includes(attr)) {
-      return false;
+    if (studentInfo !== undefined) {
+      userData = {
+        name: studentInfo.StudentName,
+        netid: studentInfo.UWNetID,
+        sid: studentInfo.StudentNumber,
+        reason: req.body.reason
+      }
+
+      let now = new Date();
+      userData.timestamp = now.toISOString();
+      userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
+
+      mongoDb.connect(async (err, db) => {
+        if (err) throw err;
+        let logins = db.db('SVL-Logins').collection('Logins');
+        await logins.insertOne(userData);
+        await mongoDb.close();
+      });
+
+      res.json(userData);
     }
   }
-
-  return true;
-}
+});
 
 /**
  * Checks to see if a submitted request contains an authorization header
@@ -70,16 +76,75 @@ function checkAuthHeader(req) {
 }
 
 /**
- * Gets the student's information for a given a reg_id
- * @param {string} reg_id The reg_id of the user to log
+ * Gets the student's RegId for a given a mag strip code
+ * @param {string} magStripCode The mag strip code to get information for
+ * @returns A Promise with the student's regId or an error
  */
-function getStudentInfo(reg_id) {
-  let searchUrl = new URL("https://wseval.s.uw.edu/student/v5/person");
-  let searchParams = searchUrl.searchParams;
-  searchParams.append("reg_id", reg_id);
+function getStudentRegId(magStripCode) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: `wseval.s.uw.edu`,
+      method: 'GET',
+      path: `/idcard/v1/card.json?mag_strip_code=${magStripCode}`,
+      key: fs.readFileSync('certs/ssl/svlcardreader_vetlife_washington_edu.key.pem'),
+      cert: fs.readFileSync('certs/ssl/svlcardreader_vetlife_washington_edu.crt.pem'),
+      agent: false
+    }
 
-  fetch(searchUrl)
-    .then(res => console.log(res.text()));
+    const req = https.request(options, (res) => {
+      res.setEncoding('utf-8');
+      res.on('data', data => {
+        jsonData = JSON.parse(data);
+        if (res.statusCode != 200) {
+          reject(jsonData.StatusDescription);
+        } else {
+          resolve(jsonData.Cards[0].RegID);
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      reject(err);
+    });
+
+    req.end();
+  });
+}
+
+/**
+ * Gets a students information from their regId
+ * @param {string} regId RegId belonging to a student
+ * @returns A Promise with the student's information or an error
+ */
+function getStudentInfo(regId) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: `wseval.s.uw.edu`,
+      method: 'GET',
+      path: `/student/v5/person.json?reg_id=${regId}`,
+      key: fs.readFileSync('certs/ssl/svlcardreader_vetlife_washington_edu.key.pem'),
+      cert: fs.readFileSync('certs/ssl/svlcardreader_vetlife_washington_edu.crt.pem'),
+      agent: false
+    }
+
+    const req = https.request(options, res => {
+      res.setEncoding('utf-8');
+      res.on('data',  data => {
+        jsonData = JSON.parse(data);
+        if (res.statusCode != 200) {
+          reject(jsonData.StatusDescription);
+        } else {
+          resolve(jsonData.Persons[0]);
+        }
+      });
+    });
+
+    req.on('error', err => {
+      reject(err);
+    });
+
+    req.end();
+  });
 }
 
 module.exports = router;
