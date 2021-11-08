@@ -1,5 +1,6 @@
 const express = require('express');
 const https = require('https');
+const http = require('http');
 const getCert = require('./auth');
 const app = express();
 const port = process.env.PORT || 8080;
@@ -29,6 +30,6 @@ const port = process.env.PORT || 8080;
 let initRoutes = require('./routes');
 app.use('/', initRoutes());
 
-https.createServer({}, app).listen(port, () => {
+http.createServer({}, app).listen(port, () => {
   console.log(`Server started on port: ` + port);
 });
