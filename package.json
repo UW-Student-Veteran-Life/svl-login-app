@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/hsingh0825/svl-be#readme",
   "dependencies": {
+    "@azure/cosmos": "^3.14.1",
     "@azure/identity": "^2.0.1",
     "@azure/keyvault-secrets": "^4.3.0",
     "express": "^4.17.1",
