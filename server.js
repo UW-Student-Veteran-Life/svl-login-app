@@ -1,11 +1,26 @@
 const express = require('express');
+const https = require('https');
+const getCert = require('./auth');
 const app = express();
-const port = 5000 | process.env.port
+const port = 5000 || process.env.port;
 
-let routes = require('./routes');
+getCert()
+.then(cert => {
+  httpsOptions = {
+    pfx: new Buffer.from(cert.value, 'base64')
+  }
 
-app.use('/', routes);
+  requestOptions = {
+    hostname: `wseval.s.uw.edu`,
+    method: 'GET',
+    pfx: new Buffer.from(cert.value, 'base64')
+  }
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+  // Router middleware setup
+  let initRoutes = require('./routes');
+  app.use('/', initRoutes(requestOptions));
+
+  https.createServer(httpsOptions, app).listen(port, () => {
+    console.log(`Server started on port: ` + port);
+  });
+}).catch(err => console.error(err));
