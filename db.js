@@ -1,10 +1,11 @@
-const { MongoClient } = require('mongodb');
-const mongoUri = "mongodb+srv://dbAdmin:rVynkmZnNlWPd7RL@uw-svl.ukooa.mongodb.net/SVL-Logins?retryWrites=true&w=majority";
+const { CosmosClient } = require('@azure/cosmos');
+const dbClient = new CosmosClient(process.env.cosmos_db_conn);
+const database = dbClient.database('SVL');
+const container = database.container('Logins');
 
-const client = new MongoClient(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  maxPoolSize: 10
-});
+async function logEntry(data) {
+  let item = await container.items.create(data);
+  return item;
+}
 
-module.exports = client;
+module.exports = logEntry;

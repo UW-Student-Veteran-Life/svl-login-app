@@ -1,24 +1,10 @@
+const https = require('https');
+const express = require('express');
+const router = express.Router();
+const logEntry = require('./db');
+
 function initRoutes(options) {
-  const https = require('https');
-  const express = require('express');
-  const router = express.Router();
-  const mongoDb = require('./db');
-
   router.use(express.json());
-
-  /**
-  // Authorization schema: Basic <credentials>
-  // base64 encoding for svl-be:uw123
-  const CRED = 'c3ZsLWJlOnV3MTIz';
-
-  router.use((req, res, next) => {
-    if (!checkAuthHeader(req)) {
-      res.status(401).json({'text': 'Authorization credentials are incorrect, please try again.'});
-    } else {
-      next();
-    }
-  });
-   */
 
   router.get('/', (req, res) => {
     res.send('Post a user entry at the /logUser endpoint');
@@ -57,14 +43,14 @@ function initRoutes(options) {
         userData.timestamp = now.toISOString();
         userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
 
-        mongoDb.connect(async (err, db) => {
-          if (err) throw err;
-          let logins = db.db('SVL-Logins').collection('Logins');
-          await logins.insertOne(userData);
-          await mongoDb.close();
-        });
-
-        res.json(userData);
+        let item = await logEntry(userData);
+        if (item.statusCode >= 200 && item.statusCode < 300) {
+          res.json(userData);
+        } else {
+          res.status(500).json({
+            "text": "There was an error inserting the data into the database, please check Azure logs"
+          });
+        }
       }
     }
   });

@@ -4,6 +4,7 @@ const getCert = require('./auth');
 const app = express();
 const port = process.env.PORT || 8080;
 
+// Get certificate from KeyVault and then start server
 getCert()
 .then(cert => {
   httpsOptions = {
