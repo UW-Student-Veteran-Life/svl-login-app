@@ -12,6 +12,7 @@ async function getCert() {
 
   const client = new SecretClient(vaultUrl, credential)
   const cert = await client.getSecret('svlcardreader-vetlife-washington-edu');
+  console.log(cert.name);
 
   return cert;
 }
