@@ -18,6 +18,10 @@ function initRoutes(options) {
     }
   });
 
+  router.get('/', (req, res) => {
+    res.send('Post a user entry at the /logUser endpoint');
+  })
+
   router.post('/logUser', async (req, res) => {
     let magStripCode = req.body.magStripCode;
     regId = await getStudentRegId(magStripCode)
