@@ -6,6 +6,7 @@ function initRoutes(options) {
 
   router.use(express.json());
 
+  /**
   // Authorization schema: Basic <credentials>
   // base64 encoding for svl-be:uw123
   const CRED = 'c3ZsLWJlOnV3MTIz';
@@ -17,6 +18,7 @@ function initRoutes(options) {
       next();
     }
   });
+   */
 
   router.get('/', (req, res) => {
     res.send('Post a user entry at the /logUser endpoint');
