@@ -7,7 +7,4 @@ const client = new MongoClient(mongoUri, {
   maxPoolSize: 10
 });
 
-
-
-
 module.exports = client;
