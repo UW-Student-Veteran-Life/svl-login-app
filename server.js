@@ -2,7 +2,7 @@ const express = require('express');
 const https = require('https');
 const getCert = require('./auth');
 const app = express();
-const port = 5000 | process.env.port;
+const port = 5000 || process.env.port;
 
 getCert()
 .then(cert => {
