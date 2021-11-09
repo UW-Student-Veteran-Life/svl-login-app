@@ -2,13 +2,14 @@ const https = require('https');
 const express = require('express');
 const router = express.Router();
 const logEntry = require('./db');
+const getCert = require('./auth');
 
 function initRoutes(options) {
   router.use(express.json());
 
   router.get('/', (req, res) => {
     res.send('Post a user entry at the /logUser endpoint');
-  })
+  });
 
   router.post('/logUser', async (req, res) => {
     let magStripCode = req.body.magStripCode;
