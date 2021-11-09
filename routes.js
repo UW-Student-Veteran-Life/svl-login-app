@@ -2,7 +2,6 @@ const https = require('https');
 const express = require('express');
 const router = express.Router();
 const logEntry = require('./db');
-const getCert = require('./auth');
 
 function initRoutes(options) {
   router.use(express.json());
@@ -55,18 +54,6 @@ function initRoutes(options) {
       }
     }
   });
-
-  /**
-   * Checks to see if a submitted request contains an authorization header
-   * with the correct base64 credentials
-   * @param {Object} req Request object submitted to a route
-   * @returns true if auth check passes, false otherwise
-   */
-  function checkAuthHeader(req) {
-    let authValue = req.headers.authorization;
-
-    return (authValue && (authValue === `Basic ${CRED}`));
-  }
 
   /**
    * Gets the student's RegId for a given a mag strip code
