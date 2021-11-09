@@ -1,6 +1,6 @@
 const express = require('express');
 const http = require('http');
-const app = express();
+const server = express();
 const getCert = require('./auth');
 const port = process.env.PORT || 8080;
 
@@ -20,9 +20,10 @@ getCert()
 
   // Router middleware setup
   let initRoutes = require('./routes');
-  app.use('/', initRoutes(requestOptions));
+  server.use('/student', initRoutes(requestOptions));
+  server.use(express.static('public'));
 
-  http.createServer(app).listen(port, () => {
+  http.createServer(server).listen(port, () => {
     console.log(`Server started on port: ` + port);
   });
 }).catch(err => console.error(err));

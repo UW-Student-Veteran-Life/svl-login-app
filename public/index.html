@@ -7,5 +7,76 @@
     <header>
       <h1>UW Student Veteran Life Card Reader Backend Implementation</h1>
     </header>
+    <main>
+      <h2>Overview</h2>
+      <section>
+        <p>
+          The purposes of this application is to log user entries to a database to record when and
+          for which reason a student enters the SVL office.
+        </p>
+      </section>
+      <h2>Documentation</h2>
+      <section>
+        <h3>Routes</h3>
+        <section>
+          <h4>Accessing Routes</h4>
+
+          <h4>POST Routes</h4>
+          <p>
+            Use <code>/student/logStudent</code> to POST a student entry to the database.
+            Submit a JSON body with the requests with the following keys & values:
+            <ul>
+              <li>magStripCode: Magnetic strip code obtained from a card swipe</li>
+              <li>reason: The reason why a student entered the SVL</li>
+            </ul>
+          </p>
+        </section>
+
+        <h3>Underlying Technologies</h3>
+        <section>
+          <p>The implementation for this backend is built on a couple of different technologies:</p>
+          <ul>
+            <li>NodeJS</li>
+            <li>Express</li>
+            <li>HTTP</li>
+            <li>CosmosDB</li>
+          </ul>
+          <p>
+            <b>Notice about hosting on Azure & HTTP:</b> A web app on Azure uses NGINX and load balancers
+            for reverse proxying. All HTTPS requests to the Azure server terminate at the load balancer and
+            is then passed on as a regular HTTP request which is why you must use <code>http.createServer()</code>
+            and not <code>https.createServer()</code>.
+          </p>
+          <p>
+            CosmosDB is a NoSQL database hosted on Azure. Use the <a href="https://azure.microsoft.com/en-us/features/storage-explorer/" target="blank">Azure Resource Storage Explorer</a>
+            with the appropriate subscription ID to access the stored data. The subscription ID can be obtained via the <a href="https://portal.azure.com" target="blank">Azure Portal</a>.
+          </p>
+        </section>
+
+        <h3>Azure Hosting</h3>
+        <section>
+          <h4>Accessing Azure Resources</h4>
+          <p>
+            To access and manage all Azure Resources, please visit the <a href="https://portal.azure.com" target="blank">Azure Portal</a>.
+            From here, you can create, delete, and edit resources within a subscription. These resources are under the
+            "Student Veteran Life" subscription.
+          </p>
+
+          <h4>Resource Groups</h4>
+          <p>The subscription comes with a variety of different resource groups, the two most pertient being: IT & Web-Dev.</p>
+          <h4>IT</h4>
+          <p>This resource group should be used to manage any IT related services like KeyVaults etc.</p>
+          <h4>Web-Dev</h4>
+          <p>
+            All web based resources go here, these include:
+            <ul>
+              <li>App Service Plans</li>
+              <li>App Services and their respective slots</li>
+              <li>Database instances</li>
+            </ul>
+          </p>
+        </section>
+      </section>
+    </main>
   </body>
 </html>
