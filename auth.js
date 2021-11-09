@@ -9,12 +9,9 @@ async function getCert() {
     process.env.AZURE_CLIENT_SECRET
   );
   const vaultUrl = 'https://svl-keyvault.vault.azure.net/';
+  const client = new SecretClient(vaultUrl, credential);
 
-  const client = new SecretClient(vaultUrl, credential)
-  const cert = await client.getSecret('svlcardreader-vetlife-washington-edu');
-  console.log(cert.name);
-
-  return cert;
+  return await client.getSecret('svlcardreader-vetlife-washington-edu');
 }
 
 module.exports = getCert;
