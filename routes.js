@@ -6,16 +6,13 @@ const logEntry = require('./db');
 function initRoutes(options) {
   router.use(express.json());
 
-  router.get('/', (req, res) => {
-    res.send('Post a user entry at the /logUser endpoint');
-  });
-
-  router.post('/logUser', async (req, res) => {
+  router.post('/logStudent', async (req, res) => {
     let magStripCode = req.body.magStripCode;
     regId = await getStudentRegId(magStripCode)
       .catch(err => {
-        console.log(`MagStripCode: ${magStripCode}`);
-        console.log(`Response: ${err}`);
+        console.error('There was an error uploading student information:')
+        console.error(`MagStripCode: ${magStripCode}`);
+        console.error(`Response: ${err}`);
         res.status(400).json({
           'text': err
         });
@@ -24,8 +21,9 @@ function initRoutes(options) {
     if (regId !== undefined) {
       studentInfo = await getStudentInfo(regId)
       .catch(err => {
-        console.log(`Reg ID:  ${regId}`);
-        console.log(`Response: ${err}`);
+        console.error('There was an error uploading student information:')
+        console.error(`Reg ID:  ${regId}`);
+        console.error(`Response: ${err}`);
         res.status(400).json({
           'text': err
         });
