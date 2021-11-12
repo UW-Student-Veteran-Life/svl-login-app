@@ -8,48 +8,47 @@ function initRoutes(options) {
 
   router.post('/logStudent', async (req, res) => {
     let magStripCode = req.body.magStripCode;
-    regId = await getStudentRegId(magStripCode)
-      .catch(err => {
-        console.error('There was an error uploading student information:')
-        console.error(`MagStripCode: ${magStripCode}`);
-        console.error(`Response: ${err}`);
-        res.status(400).json({
-          'text': err
-        });
-      });
+    let netId = req.body.netId;
+    let sid = req.body.sid;
+    let studentData;
 
-    if (regId !== undefined) {
-      studentInfo = await getStudentInfo(regId)
-      .catch(err => {
-        console.error('There was an error uploading student information:')
-        console.error(`Reg ID:  ${regId}`);
-        console.error(`Response: ${err}`);
-        res.status(400).json({
-          'text': err
-        });
-      });
-
-      if (studentInfo !== undefined) {
-        userData = {
-          name: studentInfo.StudentName,
-          netid: studentInfo.UWNetID,
-          sid: studentInfo.StudentNumber,
-          reason: req.body.reason
-        }
-
-        let now = new Date();
-        userData.timestamp = now.toISOString();
-        userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
-
-        let item = await logEntry(userData);
-        if (item.statusCode >= 200 && item.statusCode < 300) {
-          res.json(userData);
-        } else {
-          res.status(500).json({
-            "text": "There was an error inserting the data into the database, please check Azure logs"
-          });
-        }
+    try {
+      if (req.body.reason === undefined) {
+        res.status(400).json({ 'text': 'Please include a reason with the request body'});
+        return;
+      } else if (magStripCode != undefined) {
+        regId = await getStudentRegId(magStripCode);
+        studentInfo = await getStudentInfo(regId);
+      } else if (netId != undefined) {
+        studentInfo = await getStudentInfo(netId, type="net_id");
+      } else if (sid != undefined) {
+        studentInfo = await getStudentInfo(sid, type="student_number");
+      } else {
+        res.status(400).json({ 'text': 'Please supply either a magstrip code, net ID, or student ID'});
+        return;
       }
+    } catch (e) {
+      console.log(e);
+      res.status(400).json({ 'text': e });
+      return;
+    }
+
+    studentData = {
+      name: studentInfo.StudentName,
+      netid: studentInfo.UWNetID,
+      sid: studentInfo.StudentNumber,
+      reason: req.body.reason,
+      timestamp: (new Date()).toString(),
+      text: `${studentInfo.StudentName} has successfully signed in at ${(new Date()).toString()} to: ${req.body.reason}`
+    }
+
+    let item = await logEntry(studentData);
+    if (item.statusCode >= 200 && item.statusCode < 300) {
+      res.json(studentData);
+    } else {
+      res.status(500).json({
+        "text": "There was an error inserting the data into the database, please check Azure logs"
+      });
     }
   });
 
@@ -84,12 +83,17 @@ function initRoutes(options) {
 
   /**
    * Gets a students information from their regId
-   * @param {string} regId RegId belonging to a student
+   * @param {string} searchParam Search parameter to find student
+   * @param {string} type The type of search parameter, can be: reg_id (Registration ID), net_id (UW Net ID), student_number (Student Number)
    * @returns A Promise with the student's information or an error
    */
-  function getStudentInfo(regId) {
+  function getStudentInfo(searchParam, type="reg_id") {
+    if (type != 'reg_id' && type != 'net_id' && type != 'student_number') {
+      throw new Error('Type is not of value reg_id, net_id, or student_number');
+    }
+
     return new Promise((resolve, reject) => {
-      options.path = `/student/v5/person.json?reg_id=${regId}`
+      options.path = `/student/v5/person.json?${type}=${searchParam}`
 
       const req = https.request(options, res => {
         res.setEncoding('utf-8');
