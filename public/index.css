@@ -5,7 +5,9 @@ html {
 body {
   margin: 0;
   height: 100%;
+  font-family: 'Open Sans', sans-serif;
 }
+
 
 h1 {
   font-family: 'Encode Sans', sans-serif;
