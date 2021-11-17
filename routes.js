@@ -2,6 +2,7 @@ const https = require('https');
 const express = require('express');
 const router = express.Router();
 const logEntry = require('./db');
+require('url');
 
 function initRoutes(options) {
   router.use(express.json());
@@ -59,9 +60,10 @@ function initRoutes(options) {
    */
   function getStudentRegId(magStripCode) {
     return new Promise((resolve, reject) => {
-      options.path = `/idcard/v1/card.json?mag_strip_code=${magStripCode}`
+      const requestUrl = new URL(`/idcard/v1/card.json`, 'https://wseval.s.uw.edu');
+      requestUrl.searchParams.append('mag_strip_code', magStripCode);
 
-      const req = https.request(options, (res) => {
+      const req = https.get(requestUrl, options, (res) => {
         res.setEncoding('utf-8');
         res.on('data', data => {
           jsonData = JSON.parse(data);
@@ -93,9 +95,10 @@ function initRoutes(options) {
     }
 
     return new Promise((resolve, reject) => {
-      options.path = `/student/v5/person.json?${type}=${searchParam}`
+      const requestUrl = new URL(`/student/v5/person.json`, 'https://wseval.s.uw.edu');
+      requestUrl.searchParams.append(type, searchParam);
 
-      const req = https.request(options, res => {
+      const req = https.get(options, res => {
         res.setEncoding('utf-8');
         res.on('data',  data => {
           jsonData = JSON.parse(data);
