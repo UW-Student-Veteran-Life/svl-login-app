@@ -12,8 +12,6 @@ getCert()
   console.log(`Certificate expiration date: ${cert.properties.expiresOn}`);
 
   requestOptions = {
-    hostname: `wseval.s.uw.edu`,
-    method: 'GET',
     // PFX is encoded in base64
     pfx: new Buffer.from(cert.value, 'base64')
   }
