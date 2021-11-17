@@ -98,7 +98,7 @@ function initRoutes(options) {
       const requestUrl = new URL(`/student/v5/person.json`, 'https://wseval.s.uw.edu');
       requestUrl.searchParams.append(type, searchParam);
 
-      const req = https.get(options, res => {
+      const req = https.get(requestUrl, options, res => {
         res.setEncoding('utf-8');
         res.on('data',  data => {
           jsonData = JSON.parse(data);
