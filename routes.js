@@ -1,7 +1,7 @@
 const https = require('https');
 const express = require('express');
 const router = express.Router();
-const logEntry = require('./db');
+const [ logEntry, getItemsByDate ] = require('./db');
 require('url');
 
 function initRoutes(options) {
@@ -35,8 +35,16 @@ function initRoutes(options) {
     }
 
     let today = new Date();
+    let hours = today.getHours();
+    let minutes = today.getMinutes();
     let seconds = today.getSeconds();
 
+    if (hours < 10) {
+      hours = '0' + hours;
+    }
+    if (minutes < 10) {
+      minutes = '0' + minutes;
+    }
     if (seconds < 10) {
       seconds = '0' + seconds;
     }
@@ -47,7 +55,7 @@ function initRoutes(options) {
       sid: studentInfo.StudentNumber,
       reason: req.body.reason,
       date: `${today.getMonth()+1}-${today.getDate()}-${today.getFullYear()}`,
-      timestamp: `${today.getHours()}:${today.getMinutes()}:${seconds}`,
+      timestamp: `${hours}:${minutes}:${seconds}`,
       text: `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`
     }
 
@@ -58,6 +66,18 @@ function initRoutes(options) {
       res.status(500).json({
         "text": "There was an error inserting the data into the database, please check Azure logs"
       });
+    }
+  });
+
+  router.get('/records', async (req, res) => {
+    let date = req.query.date;
+    console.log('Attempting to pull information for:', date);
+    try {
+      let data = await getItemsByDate(date);
+      const csv = generateCsv(data);
+      res.status(200).send(csv);
+    } catch (e) {
+      res.status(500).send(`There was an error getting the information you requested: ${e}`);
     }
   });
 
@@ -124,6 +144,19 @@ function initRoutes(options) {
 
       req.end();
     });
+  }
+
+  /**
+   * Generates a CSV from the passed in data
+   * @param {Array} data An array of objects with each object being a record
+   */
+  function generateCsv(data) {
+    let csv = "";
+    data.forEach(record => {
+      csv += `${record.name},${record.sid},${record.reason},${record.date},${record.timestamp},\n`
+    });
+
+    return csv;
   }
 
   return router;
