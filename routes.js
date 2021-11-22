@@ -34,13 +34,21 @@ function initRoutes(options) {
       return;
     }
 
+    let today = new Date();
+    let seconds = today.getSeconds();
+
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+
     studentData = {
       name: studentInfo.StudentName,
       netid: studentInfo.UWNetID,
       sid: studentInfo.StudentNumber,
       reason: req.body.reason,
-      timestamp: (new Date()).toString(),
-      text: `${studentInfo.StudentName} has successfully signed in at ${(new Date()).toString()} to: ${req.body.reason}`
+      date: `${today.getMonth()+1}-${today.getDate()}-${today.getFullYear()}`,
+      timestamp: `${today.getHours()}:${today.getMinutes()}:${seconds}`,
+      text: `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`
     }
 
     let item = await logEntry(studentData);
