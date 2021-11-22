@@ -20,6 +20,7 @@ getCert()
   let initRoutes = require('./routes');
   server.use('/student', initRoutes(requestOptions));
   server.use(express.static('public'));
+  server.use(express.static('views'));
 
   http.createServer(server).listen(port, () => {
     console.log(`Server started on port: ` + port);
