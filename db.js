@@ -8,4 +8,15 @@ async function logEntry(data) {
   return item;
 }
 
-module.exports = logEntry;
+async function getItemsByDate(date) {
+  const { resources } = await container.items.query(`SELECT * FROM C WHERE C.date = "${date}"`).fetchAll();
+  const results = [];
+
+  for (const record of resources) {
+    results.push(record);
+  }
+
+  return results;
+}
+
+module.exports = [logEntry, getItemsByDate];
