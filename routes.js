@@ -71,7 +71,6 @@ function initRoutes(options) {
 
   router.get('/records', async (req, res) => {
     let date = req.query.date;
-    console.log('Attempting to pull information for:', date);
     try {
       let data = await getItemsByDate(date);
       const csv = generateCsv(data);
@@ -153,7 +152,7 @@ function initRoutes(options) {
   function generateCsv(data) {
     let csv = "";
     data.forEach(record => {
-      csv += `${record.name},${record.sid},${record.reason},${record.date},${record.timestamp},\n`
+      csv += `${record.name},${record.netid},${record.sid},${record.reason},${record.date},${record.timestamp},\n`
     });
 
     return csv;
