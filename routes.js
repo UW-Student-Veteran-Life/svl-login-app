@@ -127,16 +127,16 @@ function initRoutes(options) {
 
       const req = https.get(requestUrl, options, res => {
         res.setEncoding('utf-8');
-        res.on('data',  data => {
-          try {
-            jsonData = JSON.parse(data);
-            if (res.statusCode != 200) {
-              reject(jsonData.StatusDescription);
-            } else {
-              resolve(jsonData.Persons[0]);
-            }
-          } catch {
-            reject('There was an error parsing JSON data');
+
+        let rawData = '';
+        res.on('data', (chunk) => { rawData += chunk; });
+
+        res.on('end',  () => {
+          if (res.statusCode != 200) {
+            reject(jsonData.StatusDescription);
+          } else {
+            jsonData = JSON.parse(rawData);
+            resolve(jsonData.Persons[0]);
           }
         });
       });
