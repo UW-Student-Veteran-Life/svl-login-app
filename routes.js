@@ -132,10 +132,10 @@ function initRoutes(options) {
         res.on('data', (chunk) => { rawData += chunk; });
 
         res.on('end',  () => {
+          jsonData = JSON.parse(rawData);
           if (res.statusCode != 200) {
             reject(jsonData.StatusDescription);
           } else {
-            jsonData = JSON.parse(rawData);
             resolve(jsonData.Persons[0]);
           }
         });
