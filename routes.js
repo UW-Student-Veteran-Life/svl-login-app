@@ -35,26 +35,24 @@ function initRoutes(options) {
     }
 
     let today = new Date();
-    let hours = today.getHours();
-    let minutes = today.getMinutes();
-    let seconds = today.getSeconds();
 
-    if (hours < 10) {
-      hours = '0' + hours;
-    }
-    if (minutes < 10) {
-      minutes = '0' + minutes;
-    }
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
+    let month = today.getMonth() + 1;
+    month = month < 10 ? "0" + month : month;
+    let day = today.getDate();
+    day = day < 10 ? "0" + day : day;
+    let hours = today.getHours();
+    hours = hours < 10 ? "0" + hours : hours;
+    let minutes = today.getMinutes();
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    let seconds = today.getSeconds();
+    seconds = seconds < 10 ? "0" + seconds : seconds;
 
     studentData = {
       name: studentInfo.StudentName,
       netid: studentInfo.UWNetID,
       sid: studentInfo.StudentNumber,
       reason: req.body.reason,
-      date: `${today.getMonth()+1}-${today.getDate()}-${today.getFullYear()}`,
+      date: `${month}-${day}-${today.getFullYear()}`,
       timestamp: `${hours}:${minutes}:${seconds}`,
       text: `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`
     }
