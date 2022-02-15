@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const morgan = require('morgan');
 const server = express();
 const getCert = require('./auth');
 const port = process.env.PORT || 8080;
@@ -18,6 +19,7 @@ getCert()
 
   // Router middleware setup
   let initRoutes = require('./routes');
+  server.use(morgan('combined'));
   server.use('/student', initRoutes(requestOptions));
   server.use(express.static('public'));
   server.use(express.static('views'));
