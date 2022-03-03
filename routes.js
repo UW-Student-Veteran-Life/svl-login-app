@@ -13,6 +13,8 @@ function initRoutes(options) {
     let sid = req.body.sid;
     let studentData;
 
+    console.log(req.body);
+
     try {
       if (req.body.reason === undefined) {
         res.status(400).json({ 'text': 'Please include a reason with the request body'});
