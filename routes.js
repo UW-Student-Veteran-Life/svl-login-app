@@ -93,11 +93,17 @@ function initRoutes(options) {
       const req = https.get(requestUrl, options, (res) => {
         res.setEncoding('utf-8');
         res.on('data', data => {
-          jsonData = JSON.parse(data);
-          if (res.statusCode != 200) {
-            reject(jsonData.StatusDescription);
-          } else {
-            resolve(jsonData.Cards[0].RegID);
+          try {
+            jsonData = JSON.parse(data);
+            if (res.statusCode != 200) {
+              reject(jsonData.StatusDescription);
+            } else {
+              resolve(jsonData.Cards[0].RegID);
+            }
+          } catch (e) {
+            console.log(e);
+            console.log(jsonData);
+            reject('Unable to pull card info, please try again');
           }
         });
       });
