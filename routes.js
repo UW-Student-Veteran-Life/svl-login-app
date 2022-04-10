@@ -151,11 +151,8 @@ function initRoutes(options) {
     let csv = "";
     data.forEach(record => {
       const timestamp = new Date(record.timestamp);
-      console.log(timestamp);
       csv += `${record.name},${record.netid},${record.sid},${record.reason},${record.timestamp},\n`
     });
-
-    console.log(csv);
 
     return csv;
   }
