@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const morgan = require('morgan');
 const server = express();
 const getCert = require('./auth');
 const port = process.env.PORT || 8080;
@@ -12,16 +13,16 @@ getCert()
   console.log(`Certificate expiration date: ${cert.properties.expiresOn}`);
 
   requestOptions = {
-    hostname: `wseval.s.uw.edu`,
-    method: 'GET',
     // PFX is encoded in base64
     pfx: new Buffer.from(cert.value, 'base64')
   }
 
   // Router middleware setup
   let initRoutes = require('./routes');
+  server.use(morgan('combined'));
   server.use('/student', initRoutes(requestOptions));
   server.use(express.static('public'));
+  server.use(express.static('views'));
 
   http.createServer(server).listen(port, () => {
     console.log(`Server started on port: ` + port);

@@ -2,10 +2,14 @@
 <html>
   <head>
     <title>UW Student Veteran Life Card Reader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@900&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="index.css" rel="stylesheet">
   </head>
   <body>
     <header>
-      <h1>UW Student Veteran Life Card Reader Backend Implementation</h1>
+      <h1>UW STUDENT VETERAN LIFE CARD READER BACKEND IMPLEMENTATION</h1>
     </header>
     <main>
       <h2>Overview</h2>
@@ -15,38 +19,61 @@
           for which reason a student enters the SVL office.
         </p>
       </section>
+      <h2>Pulling Data</h2>
+      <section>
+        <p>CSV records for a day can be pulled at the <a href="/records">/records</a> endpoint.</p>
+      </section>
       <h2>Documentation</h2>
       <section>
         <h3>Routes</h3>
+        <hr>
         <section>
           <h4>Accessing Routes</h4>
 
           <h4>POST Routes</h4>
+          <h5>/student/logStudent</h5>
           <p>
             Use <code>/student/logStudent</code> to POST a student entry to the database.
-            Submit a JSON body with the requests with the following keys & values:
+            The POST body must be a <code>JSON</code> body.
+          </p>
+          <p>
+            Each request must have a student identifier which can be one of the following:
             <ul>
-              <li>magStripCode: Magnetic strip code obtained from a card swipe</li>
-              <li>reason: The reason why a student entered the SVL</li>
+              <li><code>magStripCode</code>: Magstrip code from a card swipe</li>
+              <li><code>netId</code>: Student's UW Net ID</li>
+              <li><code>sid</code>: Student number</li>
             </ul>
+          </p>
+          <p> Alongside the student identifier, a reason must be included as to why the student is trying to sign in.</p>
+          <p>
+            A successful response from the API looks like:
+            <pre>
+              <code>
+                {
+                  "name": "Student name",
+                  "netid": "Student netId",
+                  "sid": "Student number",
+                  "reason": "Logging in to study",
+                  "timestamp": "Fri Nov 12 2021 02:38:36 GMT-0800 (Pacific Standard Time)",
+                  "text": "Student name has successfully signed in at Fri Nov 12 2021 02:38:36 GMT-0800 (Pacific Standard Time) to: Logging in to study",
+                  "id": "#########-#############-#############-###########"
+                }
+              </code>
+            </pre>
+            The <code>id</code> field is the insertion ID inside of CosmosDB. This ID can be used to find a specific record.
           </p>
         </section>
 
         <h3>Underlying Technologies</h3>
+        <hr>
         <section>
           <p>The implementation for this backend is built on a couple of different technologies:</p>
           <ul>
             <li>NodeJS</li>
             <li>Express</li>
-            <li>HTTP</li>
+            <li>HTTP (Why HTTP is used instead of HTTPS is explained under Azure Hosting)</li>
             <li>CosmosDB</li>
           </ul>
-          <p>
-            <b>Notice about hosting on Azure & HTTP:</b> A web app on Azure uses NGINX and load balancers
-            for reverse proxying. All HTTPS requests to the Azure server terminate at the load balancer and
-            is then passed on as a regular HTTP request which is why you must use <code>http.createServer()</code>
-            and not <code>https.createServer()</code>.
-          </p>
           <p>
             CosmosDB is a NoSQL database hosted on Azure. Use the <a href="https://azure.microsoft.com/en-us/features/storage-explorer/" target="blank">Azure Resource Storage Explorer</a>
             with the appropriate subscription ID to access the stored data. The subscription ID can be obtained via the <a href="https://portal.azure.com" target="blank">Azure Portal</a>.
@@ -54,7 +81,16 @@
         </section>
 
         <h3>Azure Hosting</h3>
+        <hr>
         <section>
+          <h4>Why HTTP and not HTTPS?</h4>
+          <p>
+            A web app on Azure uses NGINX and load balancers
+            for reverse proxying. All HTTPS requests to the Azure server terminate at the load balancer and
+            is then passed on as a regular HTTP request which is why you must use <code>http.createServer()</code>
+            and not <code>https.createServer()</code>.
+          </p>
+
           <h4>Accessing Azure Resources</h4>
           <p>
             To access and manage all Azure Resources, please visit the <a href="https://portal.azure.com" target="blank">Azure Portal</a>.
@@ -64,8 +100,10 @@
 
           <h4>Resource Groups</h4>
           <p>The subscription comes with a variety of different resource groups, the two most pertient being: IT & Web-Dev.</p>
+
           <h4>IT</h4>
           <p>This resource group should be used to manage any IT related services like KeyVaults etc.</p>
+
           <h4>Web-Dev</h4>
           <p>
             All web based resources go here, these include:

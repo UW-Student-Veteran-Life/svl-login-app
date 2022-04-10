@@ -1,55 +1,70 @@
 const https = require('https');
 const express = require('express');
 const router = express.Router();
-const logEntry = require('./db');
+const [ logEntry, getItemsByDate ] = require('./db');
+require('url');
 
 function initRoutes(options) {
   router.use(express.json());
 
   router.post('/logStudent', async (req, res) => {
     let magStripCode = req.body.magStripCode;
-    regId = await getStudentRegId(magStripCode)
-      .catch(err => {
-        console.error('There was an error uploading student information:')
-        console.error(`MagStripCode: ${magStripCode}`);
-        console.error(`Response: ${err}`);
-        res.status(400).json({
-          'text': err
-        });
-      });
+    let netId = req.body.netId;
+    let sid = req.body.sid;
+    let studentData;
 
-    if (regId !== undefined) {
-      studentInfo = await getStudentInfo(regId)
-      .catch(err => {
-        console.error('There was an error uploading student information:')
-        console.error(`Reg ID:  ${regId}`);
-        console.error(`Response: ${err}`);
-        res.status(400).json({
-          'text': err
-        });
-      });
+    console.log(req.body);
 
-      if (studentInfo !== undefined) {
-        userData = {
-          name: studentInfo.StudentName,
-          netid: studentInfo.UWNetID,
-          sid: studentInfo.StudentNumber,
-          reason: req.body.reason
-        }
-
-        let now = new Date();
-        userData.timestamp = now.toISOString();
-        userData.text = `${userData.name} has successfully signed in at ${now.toString()}`;
-
-        let item = await logEntry(userData);
-        if (item.statusCode >= 200 && item.statusCode < 300) {
-          res.json(userData);
-        } else {
-          res.status(500).json({
-            "text": "There was an error inserting the data into the database, please check Azure logs"
-          });
-        }
+    try {
+      if (req.body.reason === undefined) {
+        res.status(400).json({ 'text': 'Please include a reason with the request body'});
+        return;
+      } else if (magStripCode != undefined) {
+        regId = await getStudentRegId(magStripCode);
+        studentInfo = await getStudentInfo(regId);
+      } else if (netId != undefined) {
+        studentInfo = await getStudentInfo(netId, type="net_id");
+      } else if (sid != undefined) {
+        studentInfo = await getStudentInfo(sid, type="student_number");
+      } else {
+        res.status(400).json({ 'text': 'Please supply either a magstrip code, net ID, or student ID'});
+        return;
       }
+    } catch (e) {
+      console.log(e);
+      res.status(400).json({ 'text': e });
+      return;
+    }
+
+    studentData = {
+      name: studentInfo.StudentName,
+      netid: studentInfo.UWNetID,
+      sid: studentInfo.StudentNumber,
+      reason: req.body.reason,
+      timestamp: (new Date()).toISOString()
+    }
+
+    let item = await logEntry(studentData);
+    if (item.statusCode >= 200 && item.statusCode < 300) {
+      studentData.text = `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`;
+      res.json(studentData);
+    } else {
+      res.status(500).json({
+        "text": "There was an error inserting the data into the database, please check Azure logs"
+      });
+    }
+  });
+
+  router.get('/records', async (req, res) => {
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    console.log(startDate, endDate);
+    try {
+      let data = await getItemsByDate(startDate, endDate);
+      const csv = generateCsv(data);
+      res.status(200).send(csv);
+    } catch (e) {
+      res.status(500).send(`There was an error getting the information you requested: ${e}`);
     }
   });
 
@@ -60,16 +75,23 @@ function initRoutes(options) {
    */
   function getStudentRegId(magStripCode) {
     return new Promise((resolve, reject) => {
-      options.path = `/idcard/v1/card.json?mag_strip_code=${magStripCode}`
+      const requestUrl = new URL(`/idcard/v1/card.json`, 'https://wseval.s.uw.edu');
+      requestUrl.searchParams.append('mag_strip_code', magStripCode);
 
-      const req = https.request(options, (res) => {
+      const req = https.get(requestUrl, options, (res) => {
         res.setEncoding('utf-8');
         res.on('data', data => {
-          jsonData = JSON.parse(data);
-          if (res.statusCode != 200) {
-            reject(jsonData.StatusDescription);
-          } else {
-            resolve(jsonData.Cards[0].RegID);
+          try {
+            jsonData = JSON.parse(data);
+            if (res.statusCode != 200) {
+              reject(jsonData.StatusDescription);
+            } else {
+              resolve(jsonData.Cards[0].RegID);
+            }
+          } catch (e) {
+            console.log(e);
+            console.log(jsonData);
+            reject('Unable to pull card info, please try again');
           }
         });
       });
@@ -84,17 +106,27 @@ function initRoutes(options) {
 
   /**
    * Gets a students information from their regId
-   * @param {string} regId RegId belonging to a student
+   * @param {string} searchParam Search parameter to find student
+   * @param {string} type The type of search parameter, can be: reg_id (Registration ID), net_id (UW Net ID), student_number (Student Number)
    * @returns A Promise with the student's information or an error
    */
-  function getStudentInfo(regId) {
-    return new Promise((resolve, reject) => {
-      options.path = `/student/v5/person.json?reg_id=${regId}`
+  function getStudentInfo(searchParam, type="reg_id") {
+    if (type != 'reg_id' && type != 'net_id' && type != 'student_number') {
+      throw new Error('Type is not of value reg_id, net_id, or student_number');
+    }
 
-      const req = https.request(options, res => {
+    return new Promise((resolve, reject) => {
+      const requestUrl = new URL(`/student/v5/person.json`, 'https://wseval.s.uw.edu');
+      requestUrl.searchParams.append(type, searchParam);
+
+      const req = https.get(requestUrl, options, res => {
         res.setEncoding('utf-8');
-        res.on('data',  data => {
-          jsonData = JSON.parse(data);
+
+        let rawData = '';
+        res.on('data', (chunk) => { rawData += chunk; });
+
+        res.on('end',  () => {
+          jsonData = JSON.parse(rawData);
           if (res.statusCode != 200) {
             reject(jsonData.StatusDescription);
           } else {
@@ -109,6 +141,20 @@ function initRoutes(options) {
 
       req.end();
     });
+  }
+
+  /**
+   * Generates a CSV from the passed in data
+   * @param {Array} data An array of objects with each object being a record
+   */
+  function generateCsv(data) {
+    let csv = "";
+    data.forEach(record => {
+      const timestamp = new Date(record.timestamp);
+      csv += `${record.name},${record.netid},${record.sid},${record.reason},${record.timestamp},\n`
+    });
+
+    return csv;
   }
 
   return router;
