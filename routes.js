@@ -36,31 +36,17 @@ function initRoutes(options) {
       return;
     }
 
-    let today = new Date();
-
-    let month = today.getMonth() + 1;
-    month = month < 10 ? "0" + month : month;
-    let day = today.getDate();
-    day = day < 10 ? "0" + day : day;
-    let hours = today.getHours();
-    hours = hours < 10 ? "0" + hours : hours;
-    let minutes = today.getMinutes();
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    let seconds = today.getSeconds();
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-
     studentData = {
       name: studentInfo.StudentName,
       netid: studentInfo.UWNetID,
       sid: studentInfo.StudentNumber,
       reason: req.body.reason,
-      date: `${month}-${day}-${today.getFullYear()}`,
-      timestamp: `${hours}:${minutes}:${seconds}`,
-      text: `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`
+      timestamp: (new Date()).toISOString()
     }
 
     let item = await logEntry(studentData);
     if (item.statusCode >= 200 && item.statusCode < 300) {
+      studentData.text = `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`;
       res.json(studentData);
     } else {
       res.status(500).json({
@@ -70,9 +56,11 @@ function initRoutes(options) {
   });
 
   router.get('/records', async (req, res) => {
-    let date = req.query.date;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    console.log(startDate, endDate);
     try {
-      let data = await getItemsByDate(date);
+      let data = await getItemsByDate(startDate, endDate);
       const csv = generateCsv(data);
       res.status(200).send(csv);
     } catch (e) {
@@ -162,8 +150,12 @@ function initRoutes(options) {
   function generateCsv(data) {
     let csv = "";
     data.forEach(record => {
-      csv += `${record.name},${record.netid},${record.sid},${record.reason},${record.date},${record.timestamp},\n`
+      const timestamp = new Date(record.timestamp);
+      console.log(timestamp);
+      csv += `${record.name},${record.netid},${record.sid},${record.reason},${record.timestamp},\n`
     });
+
+    console.log(csv);
 
     return csv;
   }
