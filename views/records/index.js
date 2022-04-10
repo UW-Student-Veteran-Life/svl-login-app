@@ -11,23 +11,29 @@ window.addEventListener('load', () => {
  */
 async function getCsv(e) {
   e.preventDefault();
-  let date = new Date(e.target.elements['dateFilter'].value);
-  let month = normalizeDateValue(date.getMonth()+1);
-  let day = normalizeDateValue(date.getDate()+1);
-  let year = normalizeDateValue(date.getFullYear());
+  const startDate = new Date(e.target.elements['startDate'].value);
+  const endDate = new Date(e.target.elements['endDate'].value);
+  endDate.setUTCHours(23, 59, 59, 999);
 
   let request = new URL(window.location.origin + '/student/records');
-  request.searchParams.append('date', `${month}-${day}-${year}`);
+  request.searchParams.append('startDate', startDate.toISOString());
+  request.searchParams.append('endDate', endDate.toISOString());
   const response = await fetch(request);
-  let csv = await response.text();
+  const content = await response.text();
 
-  // Download CSV file
-  let downloadAnchor = document.createElement('a');
-  downloadAnchor.setAttribute('href', "data:text/plain;charset=utf-8," + encodeURIComponent(csv));
-  downloadAnchor.setAttribute('download', `${month}-${day}-${year}.csv`);
-  document.body.appendChild(downloadAnchor);
-  downloadAnchor.click();
-  document.body.removeChild(downloadAnchor);
+  if (response.ok) {
+    let csv = content;
+
+    // Download CSV file
+    let downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', "data:text/plain;charset=utf-8," + encodeURIComponent(csv));
+    downloadAnchor.setAttribute('download', `records.csv`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    document.body.removeChild(downloadAnchor);
+  } else {
+    alert (content);
+  }
 }
 
 /**
