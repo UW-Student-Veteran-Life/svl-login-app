@@ -16,7 +16,18 @@
         <li>Browser will start downloading CSV containing data</li>
       </ol>
       <form>
-        <input type="date" name="dateFilter" required>
+        <fieldset>
+          <label>
+            Start Date:
+            <input type="date" name="startDate" required>
+          </label>
+        </fieldset>
+        <fieldset>
+          <label>
+            End Date:
+            <input type="date" name="endDate" required>
+          </label>
+        </fieldset>
         <button type="submit">Submit</button>
       </form>
     </main>
