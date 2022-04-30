@@ -61,8 +61,15 @@ function initRoutes(options) {
     console.log(startDate, endDate);
     try {
       let data = await getItemsByDate(startDate, endDate);
-      const csv = generateCsv(data);
-      res.status(200).send(csv);
+      data = data.map(record => ({
+        name: record.name,
+        netId: record.netid,
+        studentId: record.sid,
+        reason: record.reason,
+        timestamp: record.timestamp
+      }));
+
+      res.status(200).json(data);
     } catch (e) {
       res.status(500).send(`There was an error getting the information you requested: ${e}`);
     }
@@ -141,20 +148,6 @@ function initRoutes(options) {
 
       req.end();
     });
-  }
-
-  /**
-   * Generates a CSV from the passed in data
-   * @param {Array} data An array of objects with each object being a record
-   */
-  function generateCsv(data) {
-    let csv = "";
-    data.forEach(record => {
-      const timestamp = new Date(record.timestamp);
-      csv += `${record.name},${record.netid},${record.sid},${record.reason},${record.timestamp},\n`
-    });
-
-    return csv;
   }
 
   return router;
