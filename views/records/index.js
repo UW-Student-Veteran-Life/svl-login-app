@@ -19,10 +19,20 @@ async function getCsv(e) {
   request.searchParams.append('startDate', startDate.toISOString());
   request.searchParams.append('endDate', endDate.toISOString());
   const response = await fetch(request);
-  const content = await response.text();
+  const content = await response.json();
 
   if (response.ok) {
-    let csv = content;
+    let csv = "";
+
+    content.forEach(record => {
+      const date = new Date(record.timestamp);
+      csv += `${record.name},` +
+      `${record.netId},` +
+      `${record.studentId},` +
+      `${record.reason},` +
+      `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()},` +
+      `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}\n`;
+    });
 
     // Download CSV file
     let downloadAnchor = document.createElement('a');
