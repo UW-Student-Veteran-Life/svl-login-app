@@ -22,7 +22,7 @@ async function getCsv(e) {
   const content = await response.json();
 
   if (response.ok) {
-    let csv = "";
+    let csv = "Name,NetId,StudentId,Reason(s), Date, Time\n";
 
     content.forEach(record => {
       const date = new Date(record.timestamp);
