@@ -1,4 +1,3 @@
-const routes = require('./routes');
 const express = require('express');
 const http = require('http');
 const morgan = require('morgan');
@@ -6,9 +5,11 @@ const morgan = require('morgan');
 const server = express();
 const port = process.env.PORT || 8080;
 
+const loginsRouter = require('./routers/logins');
+
 // Router middleware setup
 server.use(morgan('combined'));
-server.use('/student', routes);
+server.use('/api', loginsRouter);
 server.use(express.static('public'));
 server.use(express.static('views'));
 
