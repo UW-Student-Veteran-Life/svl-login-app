@@ -1,5 +1,6 @@
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
+const axios = require('axios');
 const https = require('https');
 
 const azureCred = new DefaultAzureCredential();
@@ -13,37 +14,24 @@ const apiRoot = process.env.API_ROOT;
  */
 async function getStudentRegId(magStripCode) {
   const certPfx = await kvSecretClient.getSecret('svlcardreader-vetlife-washington-edu');
-  // Certificate is encoded in base64
-  const requestOptions = {
+
+  // Create an HTTPS agent with base64 encoded certificate
+  const httpsAgent = new https.Agent({
     pfx: new Buffer.from(certPfx.value, 'base64')
-  }
+  });
 
   const requestUrl = new URL(`/idcard/v1/card.json`, apiRoot);
   requestUrl.searchParams.append('mag_strip_code', magStripCode);
 
-  const req = https.get(requestUrl, requestOptions, (res) => {
-    res.setEncoding('utf-8');
-    res.on('data', data => {
-      try {
-        jsonData = JSON.parse(data);
-        if (res.statusCode != 200) {
-          reject(jsonData.StatusDescription);
-        } else {
-          resolve(jsonData.Cards[0].RegID);
-        }
-      } catch (e) {
-        console.log(e);
-        console.log(jsonData);
-        reject('Unable to pull card info, please try again');
-      }
+  return axios.get(requestUrl, { httpsAgent })
+    .then(res => {
+      return res.data.Persons[0];
+    })
+    .catch(err => {
+      console.log(err.response.data);
+      console.log(err.response.status);
+      throw err.response.data.StatusDescription;
     });
-  });
-
-  req.on('error', (err) => {
-    throw Error(err);
-  });
-
-  req.end();
 }
 
 /**
@@ -58,34 +46,24 @@ async function getStudentInfo(searchParam, type="reg_id") {
   }
 
   const certPfx = await kvSecretClient.getSecret('svlcardreader-vetlife-washington-edu');
-  // Certificate is encoded in base64
-  const requestOptions = {
+
+  // Create an HTTPS agent with base64 encoded certificate
+  const httpsAgent = new https.Agent({
     pfx: new Buffer.from(certPfx.value, 'base64')
-  }
-  const requestUrl = new URL(`/student/v5/person.json`, apiRoot);
+  });
+
+  const requestUrl = new URL(`student/v5/person.json`, apiRoot);
   requestUrl.searchParams.append(type, searchParam);
 
-  const req = https.get(requestUrl, requestOptions, res => {
-    res.setEncoding('utf-8');
-
-    let rawData = '';
-    res.on('data', (chunk) => { rawData += chunk; });
-
-    res.on('end',  () => {
-      jsonData = JSON.parse(rawData);
-      if (res.statusCode != 200) {
-        reject(jsonData.StatusDescription);
-      } else {
-        resolve(jsonData.Persons[0]);
-      }
+  return axios.get(requestUrl, { httpsAgent })
+    .then(res => {
+      return res.data.Persons[0];
+    })
+    .catch(err => {
+      console.log(err.response.data);
+      console.log(err.response.status);
+      throw err.response.data.StatusDescription;
     });
-  });
-
-  req.on('error', err => {
-    reject(err);
-  });
-
-  req.end();
 }
 
 module.exports = { getStudentRegId, getStudentInfo }
