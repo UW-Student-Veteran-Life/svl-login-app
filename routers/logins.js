@@ -1,12 +1,25 @@
-const { getStudentRegId, getStudentInfo } = require('./services/person-search-api');
-const [ logEntry, getItemsByDate ] = require('./db');
+const { getStudentRegId, getStudentInfo } = require('../services/person-search-api');
+const { addItem, getItems } = require('../db');
 
 const express = require('express');
 const router = express.Router();
-
 router.use(express.json());
 
-router.post('/logStudent', async (req, res) => {
+router.get('/logins', async (req, res) => {
+  const startDate = req.query.startDate;
+  const endDate = req.query.endDate;
+
+  try {
+    const query = 'SELECT C.name, C.netid, C.sid, C.reason, C.created_at FROM Logins C ORDER BY C.created_at DESC';
+    const data = await getItems('Logins', query);
+
+    res.status(200).json(data);
+  } catch (e) {
+    res.status(500).send(`There was an error getting the information you requested: ${e}`);
+  }
+});
+
+router.post('/logins', async (req, res) => {
   let magStripCode = req.body.magStripCode;
   let netId = req.body.netId;
   let sid = req.body.sid;
@@ -31,7 +44,6 @@ router.post('/logStudent', async (req, res) => {
       return;
     }
   } catch (e) {
-    console.log(e);
     res.status(400).json({ 'text': e });
     return;
   }
@@ -40,11 +52,10 @@ router.post('/logStudent', async (req, res) => {
     name: studentInfo.StudentName,
     netid: studentInfo.UWNetID,
     sid: studentInfo.StudentNumber,
-    reason: req.body.reason,
-    timestamp: (new Date()).toISOString()
+    reason: req.body.reason
   }
 
-  let item = await logEntry(studentData);
+  let item = await addItem('Logins', studentData);
   if (item.statusCode >= 200 && item.statusCode < 300) {
     studentData.text = `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`;
     res.json(studentData);
@@ -52,26 +63,6 @@ router.post('/logStudent', async (req, res) => {
     res.status(500).json({
       "text": "There was an error inserting the data into the database, please check Azure logs"
     });
-  }
-});
-
-router.get('/records', async (req, res) => {
-  const startDate = req.query.startDate;
-  const endDate = req.query.endDate;
-  console.log(startDate, endDate);
-  try {
-    let data = await getItemsByDate(startDate, endDate);
-    data = data.map(record => ({
-      name: record.name,
-      netId: record.netid,
-      studentId: record.sid,
-      reason: record.reason,
-      timestamp: record.timestamp
-    }));
-
-    res.status(200).json(data);
-  } catch (e) {
-    res.status(500).send(`There was an error getting the information you requested: ${e}`);
   }
 });
 
