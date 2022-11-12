@@ -6,10 +6,12 @@ const server = express();
 const port = process.env.PORT || 8080;
 
 const loginsRouter = require('./routers/logins');
+const optionsRouter = require('./routers/options');
 
 // Router middleware setup
 server.use(morgan('combined'));
 server.use('/api', loginsRouter);
+server.use('/api', optionsRouter);
 server.use(express.static('public'));
 server.use(express.static('views'));
 
