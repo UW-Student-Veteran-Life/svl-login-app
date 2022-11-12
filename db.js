@@ -34,6 +34,15 @@ async function getItems(containerName, userQuery) {
   return resources;
 }
 
+async function deleteItem(containerName, itemId) {
+  if (!_database) {
+    await connectDatabase();
+  }
+  const container = _database.container(containerName);
+
+  await container.item(itemId, itemId).delete();
+}
+
 async function connectDatabase() {
   const dbConn = await kvSecretClient.getSecret('db-conn');
   const dbClient = new CosmosClient(dbConn.value);
@@ -41,4 +50,4 @@ async function connectDatabase() {
   _database = dbClient.database('SVL');
 }
 
-module.exports = { addItem, getItems };
+module.exports = { addItem, getItems, deleteItem };
