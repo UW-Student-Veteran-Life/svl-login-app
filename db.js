@@ -1,26 +1,44 @@
 const { CosmosClient } = require('@azure/cosmos');
-const dbClient = new CosmosClient(process.env.cosmos_db_conn);
-const database = dbClient.database('SVL');
-const container = database.container(process.env.database);
+const { DefaultAzureCredential } = require('@azure/identity');
+const { SecretClient } = require('@azure/keyvault-secrets');
 
-async function logEntry(data) {
-  let item = await container.items.create(data);
-  return item;
+const azureCred = new DefaultAzureCredential();
+const kvSecretClient = new SecretClient(process.env.VAULT_URI, azureCred);
+
+let _database = null;
+
+async function addItem(containerName, item) {
+  if (!_database) {
+    await connectDatabase();
+  }
+  const container = _database.container(containerName);
+
+  item['created_at'] = (new Date()).toJSON();
+
+  return await container.items.create(item);
 }
 
-async function getItemsByDate(startDate, endDate = null) {
-  let qry = `SELECT * FROM C WHERE C.timestamp >= "${startDate}"`;
-
-  if (endDate) qry += `AND C.timestamp <= "${endDate}"`;
-
-  const { resources } = await container.items.query(qry).fetchAll();
-  const results = [];
-
-  for (const record of resources) {
-    results.push(record);
+async function getItems(containerName, userQuery) {
+  if (!_database) {
+    await connectDatabase();
   }
 
-  return results;
+  const container = _database.container(containerName);
+
+  const qry = {
+    query: userQuery
+  };
+
+  const { resources } = await container.items.query(qry).fetchAll();
+
+  return resources;
 }
 
-module.exports = [logEntry, getItemsByDate];
+async function connectDatabase() {
+  const dbConn = await kvSecretClient.getSecret('db-conn');
+  const dbClient = new CosmosClient(dbConn.value);
+
+  _database = dbClient.database('SVL');
+}
+
+module.exports = { addItem, getItems };
