@@ -2,36 +2,36 @@ import { Container, Database } from '@azure/cosmos';
 import UserLogin from 'models/UserLogin';
 import Student from 'models/Student';
 
-export async function addLogin(containerName: string, studentInfo: Student, database: Database) {
-  const container: Container = database.container(containerName);
+export async function addLogin(studentInfo: Student, database: Database) {
+  const container: Container = database.container('Logins');
 
   let login: UserLogin = new UserLogin(studentInfo, '');
 
   return await container.items.upsert(login);
 }
   
-// async function getItems(containerName, userQuery) {
-//   if (!_database) {
-//     await connectDatabase();
-//   }
+export async function getItems(userQuery: string, database: Database): Promise<Array<UserLogin>> {
+  const container = database.container('Logins');
 
-//   const container = _database.container(containerName);
+  const qry = {
+    query: userQuery
+  };
 
-//   const qry = {
-//     query: userQuery
-//   };
+  const { resources } = await container.items.query(qry).fetchAll();
+  const logins: Array<UserLogin> = resources.map(record => {
+    const studentInfo: Student = new Student(record.name, record.studentId, record.uwNetId);
+    return new UserLogin(studentInfo, record.loginReason);
+  });
 
-//   const { resources } = await container.items.query(qry).fetchAll();
+  return logins;
+}
 
-//   return resources;
-// }
+export async function deleteItem(login: UserLogin, database: Database) {
+  const container = database.container('Logins');
 
-// async function deleteItem(containerName, itemId) {
-//   if (!_database) {
-//     await connectDatabase();
-//   }
+  if (login.id == null || login.id == undefined) {
+    throw Error('Cannot delete a login with an ID that is null or undefined');
+  }
 
-//   const container = _database.container(containerName);
-
-//   await container.item(itemId, itemId).delete();
-// }
+  await container.item(login.id, login.id).delete();
+}
