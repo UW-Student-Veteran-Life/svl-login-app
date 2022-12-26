@@ -1,4 +1,3 @@
-const { Student } = require('../models/Student');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 const axios = require('axios');
@@ -39,7 +38,7 @@ async function getStudentRegId(magStripCode) {
  * Gets a students information from their regId
  * @param {string} searchParam Search parameter to find student
  * @param {string} type The type of search parameter, can be: reg_id (Registration ID), net_id (UW Net ID), student_number (Student Number)
- * @returns {Student} Student information
+ * @returns A Promise with the student's information or an error
  */
 async function getStudentInfo(searchParam, type="reg_id") {
   if (type != 'reg_id' && type != 'net_id' && type != 'student_number') {
@@ -58,8 +57,7 @@ async function getStudentInfo(searchParam, type="reg_id") {
 
   return axios.get(requestUrl, { httpsAgent })
     .then(res => {
-      var student = res.data.Persons[0];
-      return new Student(student.StudentName, student.StudentNumber, student.UWNetID);
+      return res.data.Persons[0];
     })
     .catch(err => {
       console.log(err.response.data);
