@@ -1,7 +1,8 @@
-const { getItems } = require('../db/logins')
-// import { getStudentRegId } from '../services/person-search-api.js';
-
+const { addLogin, getAllLogins, getLoginsByDate, getLoginsByStudent } = require('../db/logins')
+const UserLogin = require('../models/UserLogin');
+const { getStudentRegId, getStudentInfo } = require('../services/person-search-api');
 const express = require('express');
+
 const router = express.Router();
 router.use(express.json());
 
@@ -10,60 +11,72 @@ router.get('/logins', async (req, res) => {
   const endDate = req.query.endDate;
 
   try {
-    const query = 'SELECT C.name, C.netid, C.sid, C.reason, C.created_at FROM Logins C ORDER BY C.created_at DESC';
-    const data = await logins.getItems(query, req.database);
+    if (startDate == undefined) {
+      const data = await getAllLogins(req.database);
+      res.json(data);
+    } else {
+      if (endDate == undefined) {
+        const data = await getLoginsByDate(new Date(startDate), null, req.database);
+        res.json(data);
+      } else {
+        const data = await getLoginsByDate(new Date(startDate), req.database, new Date(endDate));
+        res.json(data);
+      }
+    }
 
-    res.status(200).json(data);
   } catch (e) {
     res.status(500).send(`There was an error getting the information you requested: ${e}`);
   }
 });
 
-// router.post('/logins', async (req, res) => {
-//   let magStripCode = req.body.magStripCode;
-//   let netId = req.body.netId;
-//   let sid = req.body.sid;
-//   let studentInfo;
-//   let studentData;
+router.get('/logins/:studentNumber', async (req, res) => {
+  const studentNumber = req.params.studentNumber;
 
-//   console.log(req.body);
+  const results = await getLoginsByStudent(studentNumber, req.database);
 
-//   try {
-//     if (req.body.reason === undefined) {
-//       res.status(400).json({ 'text': 'Please include a reason with the request body'});
-//       return;
-//     } else if (magStripCode != undefined) {
-//       regId = await getStudentRegId(magStripCode);
-//       studentInfo = await getStudentInfo(regId);
-//     } else if (netId != undefined) {
-//       studentInfo = await getStudentInfo(netId, type="net_id");
-//     } else if (sid != undefined) {
-//       studentInfo = await getStudentInfo(sid, type="student_number");
-//     } else {
-//       res.status(400).json({ 'text': 'Please supply either a magstrip code, net ID, or student ID'});
-//       return;
-//     }
-//   } catch (e) {
-//     res.status(400).json({ 'text': e });
-//     return;
-//   }
+  res.json(results);
+});
 
-//   studentData = {
-//     name: studentInfo.StudentName,
-//     netid: studentInfo.UWNetID,
-//     sid: studentInfo.StudentNumber,
-//     reason: req.body.reason
-//   }
+router.post('/logins', async (req, res) => {
+  let student;
 
-//   let item = await addItem('Logins', studentData);
-//   if (item.statusCode >= 200 && item.statusCode < 300) {
-//     studentData.text = `${studentInfo.StudentName} has successfully signed in for: ${req.body.reason}`;
-//     res.json(studentData);
-//   } else {
-//     res.status(500).json({
-//       "text": "There was an error inserting the data into the database, please check Azure logs"
-//     });
-//   }
-// });
+  try {
+    if (req.body.reason === undefined) {
+      res.status(400).json({ 'text': 'Please include a reason with the request body'});
+      return;
+    }
 
-module.exports = router
+    switch (req.body.identifierType) {
+      case 'magStripCode':
+        const regId = await getStudentRegId(req.body.identifier);
+        student = await getStudentInfo(regId);
+        break;
+      case 'uwNetId':
+        student = await getStudentInfo(req.body.identifier, type='net_id');
+        break;
+      case 'studentId':
+        student = await getStudentInfo(req.body.identifier, type='student_number');
+        break;
+      default:
+        console.error(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
+        res.status(400).send(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
+        return;
+    }
+
+  } catch (error) {
+    res.status(400).send(error.message);
+    return;
+  }
+
+  const userLogin = new UserLogin(student, req.body.reason);
+  const item = await addLogin(userLogin, req.database);
+
+  if (item.statusCode >= 200 && item.statusCode < 300) {
+    res.json(userLogin);
+  } else {
+    res.status(500).send("There was an error inserting the data into the database, please check Azure logs");
+  }
+});
+
+module.exports = router;
+ 
