@@ -9,8 +9,7 @@ const morgan = require('morgan');
 const server = express();
 const port = process.env.PORT || 8080;
 
-const { loginsRouter } = require('./routers/logins.js');
-// import optionsRouter from './routers/options.js';
+const loginsRouter = require('./routers/logins');
 
 // Router middleware setup
 server.use(morgan('combined'));
@@ -20,8 +19,8 @@ server.use(async (req, res, next) => {
   if (vaultUri == undefined) throw Error('The environment variable \'VAULT_URI\' cannot be undefined');
   const azureCred = new DefaultAzureCredential();
   const kvSecretClient = new SecretClient(vaultUri, azureCred);
-  const dbConn = Promise.resolve(kvSecretClient.getSecret('db-conn').then(secret => secret.value));
-  const dbClient = new CosmosClient(dbConn);
+  const dbConn = await kvSecretClient.getSecret('db-conn');
+  const dbClient = new CosmosClient(dbConn.value);
   const database = dbClient.database('SVL');
 
   req.database = database;
