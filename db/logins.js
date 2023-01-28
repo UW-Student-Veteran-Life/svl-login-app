@@ -3,7 +3,8 @@
  * @description This file contains basic implementation to access a CosmosDB instance with a container
  * called 'Logins' to keep track of login events
  */
-const UserLogin = require('../models/UserLogin');
+const { Student } = require('../models/Student');
+const { UserLogin } = require('../models/UserLogin');
 
 /**
  * Adds a user login to the 'Logins' collection for the specificed CosmosDB instance
@@ -29,7 +30,8 @@ async function getAllLogins(database) {
 
   let { resources } = await container.items.query(qry).fetchAll();
   let results = resources.map(record => {
-    return new UserLogin(record.student, record.loginReason, record.createdAt);
+    const student = new Student(record.student.name, record.student.number, record.student.uwNetId);
+    return new UserLogin(student, record.loginReason, record.createdAt);
   });
 
   return results;
