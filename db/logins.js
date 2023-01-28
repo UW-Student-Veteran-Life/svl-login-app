@@ -3,8 +3,6 @@
  * @description This file contains basic implementation to access a CosmosDB instance with a container
  * called 'Logins' to keep track of login events
  */
-
-const { Database } = require('@azure/cosmos');
 const UserLogin = require('../models/UserLogin');
 
 /**
@@ -27,10 +25,10 @@ async function getAllLogins(database) {
   const container = database.container('Logins');
   const qry = {
     query: 'SELECT TOP 30 C.student, C.loginReason, C.createdAt FROM Logins C ORDER BY C.createdAt DESC'
-  }
+  };
 
   let { resources } = await container.items.query(qry).fetchAll();
-  results = resources.map(record => {
+  let results = resources.map(record => {
     return new UserLogin(record.student, record.loginReason, record.createdAt);
   });
 
@@ -51,10 +49,10 @@ async function getLoginsByDate(startDate, database, endDate = new Date()) {
     query: `SELECT C.student, C.loginReason, C.createdAt FROM Logins C 
     WHERE C.createdAt >= '${startDate.toISOString()}' 
     AND C.createdAt <= '${endDate.toISOString()}' ORDER BY C.createdAt DESC`,
-  }
+  };
 
   let { resources } = await container.items.query(qry).fetchAll();
-  results = resources.map(record => {
+  let results = resources.map(record => {
     return new UserLogin(record.student, record.loginReason, record.createdAt);
   });
 
@@ -75,10 +73,10 @@ async function getLoginsByStudent(studentNumber, database) {
     parameters: [
       {name: '@studentNumber', value: studentNumber}
     ]
-  }
+  };
 
   let { resources } = await container.items.query(qry).fetchAll();
-  results = resources.map(record => {
+  let results = resources.map(record => {
     return new UserLogin(record.student, record.loginReason, record.createdAt);
   });
 
