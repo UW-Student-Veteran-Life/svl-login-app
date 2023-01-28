@@ -14,7 +14,7 @@ class UserLogin {
   createdAt;
 
   /**
-   * 
+   * Constructs a new UserLogin
    * @param {Student} student Student associated with this login
    * @param {string} loginReason Reason why the student is logging in
    * @param {Date} createdAt Date the login was to created, set to the current system date if not specified
