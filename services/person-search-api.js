@@ -1,11 +1,15 @@
+/**
+ * @author Harmeet Singh <harm2305@uw.edu>
+ * @description This file contains implementation to interact with the Person Search API to pull
+ * basic student information
+ */
+const axios = require('axios');
 const Buffer = require('buffer');
-const process = require('process');
-
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
-const axios = require('axios');
-const Student = require('../models/Student');
 const https = require('https');
+const process = require('process');
+const Student = require('../models/Student');
 
 const azureCred = new DefaultAzureCredential();
 const kvSecretClient = new SecretClient(process.env.VAULT_URI, azureCred);
