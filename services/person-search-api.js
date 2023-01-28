@@ -37,7 +37,7 @@ async function getStudentInfo(searchParam, type='reg_id') {
     return new Student(studentData.StudentName, studentData.StudentNumber, studentData.UWNetID);
   } catch (error) {
     console.error(`There was an issue with reaching the Person Search API: ${error.message}`);
-    throw new Error(error.message);
+    throw new Error(`Unable to find ${searchParam}`);
   }
 }
 
