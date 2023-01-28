@@ -14,6 +14,7 @@ const port = process.env.PORT || 8080;
 server.set('x-powered-by', false);
 
 const loginsRouter = require('./routers/logins');
+const optionsRouter = require('./routers/options');
 
 const vaultUri = process.env.VAULT_URI;
 if (vaultUri == undefined) throw Error('The environment variable \'VAULT_URI\' cannot be undefined');
@@ -35,7 +36,7 @@ server.use(async (req, res, next) => {
 });
 
 server.use('/api', loginsRouter);
-// server.use('/api', optionsRouter);
+server.use('/api', optionsRouter);
 
 server.use(express.static('public'));
 server.use(express.static('views'));
