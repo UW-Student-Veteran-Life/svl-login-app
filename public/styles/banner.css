@@ -1,0 +1,13 @@
+.banner {
+    width: 100%;
+    padding-left: 10%;
+    overflow: auto;
+}
+
+.success-banner {
+    background-color: #00cc66;
+}
+
+.error-banner {
+    background-color: #ff6666;   
+}
