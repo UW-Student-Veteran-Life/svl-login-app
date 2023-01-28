@@ -1,4 +1,5 @@
-const { addItem, getItems, deleteItem } = require('../db');
+const { addOption, getOptions, deleteOption } = require('../db/options');
+const { Option } = require('../models/Option');
 
 const express = require('express');
 const router = express.Router();
@@ -6,27 +7,29 @@ router.use(express.json());
 
 router.get('/options', async (req, res) => {
   try {
-    const query = 'SELECT C.description, C.id FROM C ORDER BY C.description ASC';
-    const data = await getItems('Options', query);
+    const options = await getOptions(req.database);
 
-    res.status(200).json(data);
+    res.status(200).json(options);
   } catch (e) {
     res.status(500).send(`There was an error getting the information you requested: ${e}`);
   }
 });
 
 router.post('/options', async (req, res) => {
-  const optionDescription = req.body.description;
+  const description = req.body.description;
+  const descriptionUpper = description.charAt(0).toUpperCase() + description.slice(1);
+  const option = new Option(descriptionUpper);
 
-  let item = await addItem('Options', {description: optionDescription});
+  try {
+    const result = await addOption(option, req.database);
 
-  if (item.statusCode >= 200 && item.statusCode < 300) {
-    const response = `Successfully added option: ${optionDescription}`;
-    res.json(response);
-  } else {
-    res.status(500).json({
-      text: 'There was an error inserting the data into the database, please check Azure logs'
-    });
+    if (result.statusCode >= 200 && result.statusCode < 300) {
+      res.status(201).json(option);
+    } else {
+      throw new Error(result.substatus);
+    }
+  } catch (error) {
+    res.status(500).send(`There was an error getting the information you requested: ${error.message}`);
   }
 });
 
@@ -34,9 +37,10 @@ router.delete('/options/:optionId', async (req, res) => {
   const optionId = req.params.optionId;
 
   try {
-    const response = await deleteItem('Options', optionId);
-    res.json(response);
+    await deleteOption(optionId, req.database);
+    res.status(204).send(`Option ${optionId} successfully deleted`);
   } catch (e) {
+    console.error(e.message);
     res.status(500).send(`Unable to delete item with id ${optionId} from Options container, please check the logs`);
   }
 
