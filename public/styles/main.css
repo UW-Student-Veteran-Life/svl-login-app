@@ -10,6 +10,7 @@ nav > a {
   color: white;
   padding-right: 1em;
   padding-top: 1em;
+  font-size: 1.5rem;
 }
 
 h1 {
@@ -55,4 +56,10 @@ form {
 
 form > * {
   margin-bottom: 1em;
+  font-size: 100%;
+  box-sizing: border-box;
+}
+
+select, button {
+  height: 2em;
 }
