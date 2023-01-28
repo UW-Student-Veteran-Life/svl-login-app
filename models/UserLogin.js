@@ -26,4 +26,4 @@ class UserLogin {
   }
 }
 
-module.exports = UserLogin;
+module.exports = { UserLogin };
