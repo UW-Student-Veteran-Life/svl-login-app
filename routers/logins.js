@@ -1,7 +1,7 @@
 const { addLogin, getAllLogins, getLoginsByDate, getLoginsByStudent } = require('../db/logins');
-const UserLogin = require('../models/UserLogin');
+const { UserLogin } = require('../models/UserLogin');
 const { getStudentInfo } = require('../services/person-search-api');
-const { getStudentRegIdByMag } = require('../services/id-card-api');
+const { searchCard } = require('../services/id-card-api');
 const express = require('express');
 
 const router = express.Router();
@@ -39,31 +39,42 @@ router.get('/logins/:studentNumber', async (req, res) => {
 });
 
 router.post('/logins', async (req, res) => {
+  const studentIdentifierType = req.body.identifierType;
+  const studentIdentifier = req.body.identifier;
   let student;
 
+  if (req.body.reason === undefined) {
+    res.status(400).send('Reason not specified in request body');
+    return;
+  } else if (studentIdentifier === undefined) {
+    res.status(400).send('Student identifier not specified in request body');
+  }
+
   try {
-    if (req.body.reason === undefined) {
-      res.status(400).json({ 'text': 'Please include a reason with the request body'});
-      return;
-    }
+    if (studentIdentifierType === 'magStripCode') {
+      const regex = new RegExp('.{14}');
 
-    switch (req.body.identifierType) {
-    case 'magStripCode':
-      student = await getStudentInfo(await getStudentRegIdByMag(req.body.identifier));
-      break;
-    case 'uwNetId':
+      if (!regex.test(studentIdentifier)) {
+        throw new Error(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
+      }
+
+      const regId = await searchCard(req.body.identifier, 'mag_strip_code');
+      student = await getStudentInfo(regId);
+    } else if (studentIdentifierType === 'uwNetId') {
       student = await getStudentInfo(req.body.identifier, 'net_id');
-      break;
-    case 'studentId':
-      student = await getStudentInfo(req.body.identifier, 'student_number');
-      break;
-    default:
-      console.error(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
-      res.status(400).send(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
-      return;
-    }
+    } else if (studentIdentifierType === 'studentId') {
+      const regex = new RegExp('[0-9]{7}');
+      
+      if (!regex.test(studentIdentifier)) {
+        throw new Error(`Identifier ${studentIdentifier} in invalid for type ${studentIdentifierType}`);
+      }
 
+      student = await getStudentInfo(req.body.identifier, 'student_number');  
+    } else {
+      throw new Error(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
+    }
   } catch (error) {
+    console.error(error.message);
     res.status(400).send(error.message);
     return;
   }
