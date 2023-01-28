@@ -1,8 +1,12 @@
+import { genBanner } from './banners.js';
+import { gen, qs } from './dom.js';
+
 /**
- * Set the initial state of the window
+ * Set the initial state of the window by populating the login options
  */
 window.addEventListener('load', async () => {
   let options = qs('select');
+  qs('#studentIdentifier').focus();
 
   const response = await fetch('/api/options');
   const content = await response.json();
@@ -13,29 +17,71 @@ window.addEventListener('load', async () => {
       optionValue.text = option.description;
       optionValue.value = option.description;
 
-      options.appendChild(optionValue)
+      options.appendChild(optionValue);
     });
   }
 
-  qs('form').addEventListener('submit', (e) => {
-    e.preventDefault();
-  });
+  qs('#login-form').addEventListener('submit', submitLoginEvent);
 });
 
 /**
- * Returns a new element with the given tag name.
- * @param {string} tagName - HTML tag name for new DOM element.
- * @returns {object} New DOM object for given HTML tag.
+ * Submits a login event to the backend
+ * @param {Event} event DOM event that triggered this function
  */
- function gen(tagName) {
-  return document.createElement(tagName);
+async function submitLoginEvent(event) {
+  event.preventDefault();
+  const data = new FormData(event.target);
+  const identifierType = classifyIdentifer(data.get('studentIdentifier'));
+
+  const body = {
+    reason: data.get('loginReason'),
+    identifier: data.get('studentIdentifier'),
+    identifierType: identifierType
+  };
+
+  qs('#loginReason').selectedIndex = 0;
+  qs('#studentIdentifier').value = '';
+  qs('#studentIdentifier').focus();
+
+  const response = await fetch('/api/logins', {
+    method: 'POST',
+    cache: 'no-cache',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  let messageTime = 2000;
+
+  if (!response.ok) {
+    const responseText = await response.text();
+    genBanner(`There was an error logging in: ${responseText}`, qs('#submission-app'), 'error');
+    messageTime = 4000;
+  } else {
+    genBanner(`${data.get('studentIdentifier')} has successfully logged in`, qs('#submission-app'));
+  }
+
+  setTimeout(() => {
+    qs('#submission-app').removeChild(qs('#submission-app').firstChild);
+  }, messageTime);
 }
 
 /**
- * Returns the first element that matches the given CSS selector.
- * @param {string} selector - CSS query selector.
- * @returns {object} The first DOM object matching the query.
+ * Determines the type of identifer. Can be either magStripCode,
+ * studentId, or uwNetId
+ * @param {string} identifier User identifier to classify
+ * @returns {string} Classification of the identifier
  */
- function qs(selector) {
-  return document.querySelector(selector);
+function classifyIdentifer(identifier) {
+  const magStrip = new RegExp('.{14}');
+  const studentId = new RegExp('[0-9]{7}');
+
+  if (magStrip.test(identifier)) {
+    return 'magStripCode';
+  } else if (studentId.test(identifier)) {
+    return 'studentId';
+  }
+
+  return 'uwNetId';
 }
