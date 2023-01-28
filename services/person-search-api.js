@@ -7,7 +7,7 @@ const axios = require('axios');
 const https = require('https');
 const process = require('process');
 const { pfxCert } = require('./cert');
-const Student = require('../models/Student');
+const { Student } = require('../models/Student');
 
 const apiRoot = process.env.API_ROOT;
 
@@ -36,8 +36,8 @@ async function getStudentInfo(searchParam, type='reg_id') {
     const studentData = response.data.Persons[0];
     return new Student(studentData.StudentName, studentData.StudentNumber, studentData.UWNetID);
   } catch (error) {
-    console.error(`There was an issue with reaching the Person Search API: ${error.response.data.StatusDescription}`);
-    throw new Error(error.response.data.StatusDescription);
+    console.error(`There was an issue with reaching the Person Search API: ${error.message}`);
+    throw new Error(error.message);
   }
 }
 
