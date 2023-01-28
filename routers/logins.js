@@ -1,6 +1,7 @@
 const { addLogin, getAllLogins, getLoginsByDate, getLoginsByStudent } = require('../db/logins');
 const UserLogin = require('../models/UserLogin');
-const { getStudentRegId, getStudentInfo } = require('../services/person-search-api');
+const { getStudentInfo } = require('../services/person-search-api');
+const { getStudentRegIdByMag } = require('../services/id-card-api');
 const express = require('express');
 
 const router = express.Router();
@@ -48,14 +49,13 @@ router.post('/logins', async (req, res) => {
 
     switch (req.body.identifierType) {
     case 'magStripCode':
-      const regId = await getStudentRegId(req.body.identifier);
-      student = await getStudentInfo(regId);
+      student = await getStudentInfo(await getStudentRegIdByMag(req.body.identifier));
       break;
     case 'uwNetId':
-      student = await getStudentInfo(req.body.identifier, type='net_id');
+      student = await getStudentInfo(req.body.identifier, 'net_id');
       break;
     case 'studentId':
-      student = await getStudentInfo(req.body.identifier, type='student_number');
+      student = await getStudentInfo(req.body.identifier, 'student_number');
       break;
     default:
       console.error(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
