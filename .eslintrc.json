@@ -7,6 +7,7 @@
     "extends": "eslint:recommended",
     "overrides": [
     ],
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
         "ecmaVersion": "latest"
     },
