@@ -6,7 +6,7 @@
 const axios = require('axios');
 const https = require('https');
 const process = require('process');
-const pfxCert = require('./cert');
+const { pfxCert } = require('./cert');
 const Student = require('../models/Student');
 
 const apiRoot = process.env.API_ROOT;

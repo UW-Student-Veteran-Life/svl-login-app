@@ -2,7 +2,7 @@
  * @author Harmeet Singh <harm2305@uw.edu>
  * @description This module obtains the PFX certificate necessary to connect to UW IT's servers
  */
-const Buffer = require('buffer');
+const { Buffer } = require('buffer');
 const { DefaultAzureCredential } = require('@azure/identity');
 const process = require('process');
 const { SecretClient } = require('@azure/keyvault-secrets');
