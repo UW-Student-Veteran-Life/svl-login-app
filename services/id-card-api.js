@@ -1,3 +1,9 @@
+/**
+ * @author Harmeet Singh <harm2305@uw.edu>
+ * @description This module contains implementation to interact with UW's ID card API to
+ * resolve mag strip and RFID (prox_rfid) codes
+ */
+
 const axios = require('axios');
 const https = require('https');
 const { pfxCert } = require('./cert');
