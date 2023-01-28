@@ -1,13 +1,8 @@
 const axios = require('axios');
-const Buffer = require('buffer');
-const { DefaultAzureCredential } = require('@azure/identity');
 const https = require('https');
+const pfxCert = require('./cert');
 const process = require('process');
-const { SecretClient } = require('@azure/keyvault-secrets');
 
-
-const azureCred = new DefaultAzureCredential();
-const kvSecretClient = new SecretClient(process.env.VAULT_URI, azureCred);
 const apiRoot = process.env.API_ROOT;
 
 /**
@@ -16,11 +11,9 @@ const apiRoot = process.env.API_ROOT;
  * @returns A Promise with the student's regId or an error
  */
 async function getStudentRegIdByMag(magStripCode) {
-  const certPfx = await kvSecretClient.getSecret('svlcardreader-vetlife-washington-edu');
-
   // Create an HTTPS agent with base64 encoded certificate
   const httpsAgent = new https.Agent({
-    pfx: new Buffer.from(certPfx.value, 'base64')
+    pfx: await pfxCert
   });
 
   const requestUrl = new URL('/idcard/v1/card.json', apiRoot);
@@ -43,11 +36,9 @@ async function getStudentRegIdByMag(magStripCode) {
  * @returns {Promise<string>} The student's reg ID
  */
 async function getStudentRegIdByProx(proxRfid) {
-  const certPfx = await kvSecretClient.getSecret('svlcardreader-vetlife-washington-edu');
-
   // Create an HTTPS agent with base64 encoded certificate
   const httpsAgent = new https.Agent({
-    pfx: new Buffer.from(certPfx.value, 'base64')
+    pfx: await pfxCert
   });
 
   const requestUrl = new URL('/idcard/v1/card.json', apiRoot);
