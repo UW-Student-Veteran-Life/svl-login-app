@@ -1,4 +1,4 @@
-const { addLogin, getAllLogins, getLoginsByDate, getLoginsByStudent } = require('../db/logins')
+const { addLogin, getAllLogins, getLoginsByDate, getLoginsByStudent } = require('../db/logins');
 const UserLogin = require('../models/UserLogin');
 const { getStudentRegId, getStudentInfo } = require('../services/person-search-api');
 const express = require('express');
@@ -47,20 +47,20 @@ router.post('/logins', async (req, res) => {
     }
 
     switch (req.body.identifierType) {
-      case 'magStripCode':
-        const regId = await getStudentRegId(req.body.identifier);
-        student = await getStudentInfo(regId);
-        break;
-      case 'uwNetId':
-        student = await getStudentInfo(req.body.identifier, type='net_id');
-        break;
-      case 'studentId':
-        student = await getStudentInfo(req.body.identifier, type='student_number');
-        break;
-      default:
-        console.error(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
-        res.status(400).send(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
-        return;
+    case 'magStripCode':
+      const regId = await getStudentRegId(req.body.identifier);
+      student = await getStudentInfo(regId);
+      break;
+    case 'uwNetId':
+      student = await getStudentInfo(req.body.identifier, type='net_id');
+      break;
+    case 'studentId':
+      student = await getStudentInfo(req.body.identifier, type='student_number');
+      break;
+    default:
+      console.error(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
+      res.status(400).send(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
+      return;
     }
 
   } catch (error) {
@@ -74,7 +74,7 @@ router.post('/logins', async (req, res) => {
   if (item.statusCode >= 200 && item.statusCode < 300) {
     res.json(userLogin);
   } else {
-    res.status(500).send("There was an error inserting the data into the database, please check Azure logs");
+    res.status(500).send('There was an error inserting the data into the database, please check Azure logs');
   }
 });
 
