@@ -25,7 +25,7 @@ router.post('/options', async (req, res) => {
     res.json(response);
   } else {
     res.status(500).json({
-      "text": "There was an error inserting the data into the database, please check Azure logs"
+      text: 'There was an error inserting the data into the database, please check Azure logs'
     });
   }
 });
