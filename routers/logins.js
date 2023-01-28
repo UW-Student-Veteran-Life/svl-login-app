@@ -48,6 +48,7 @@ router.post('/logins', async (req, res) => {
     return;
   } else if (studentIdentifier === undefined) {
     res.status(400).send('Student identifier not specified in request body');
+    return;
   }
 
   try {
