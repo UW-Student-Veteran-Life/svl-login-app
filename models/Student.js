@@ -6,15 +6,15 @@
  * @property {string} uwNetId The UW Net ID belonging to a student
  */
 class Student {
-    name;
-    number;
-    uwNetId;
+  name;
+  number;
+  uwNetId;
 
-    constructor(studentName, studentNumber, uwNetId) {
-        this.name = studentName;
-        this.number = studentNumber;
-        this.uwNetId = uwNetId;
-    }
+  constructor(studentName, studentNumber, uwNetId) {
+    this.name = studentName;
+    this.number = studentNumber;
+    this.uwNetId = uwNetId;
+  }
 }
 
-module.exports = Student;
+module.exports = { Student };
