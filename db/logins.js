@@ -3,6 +3,9 @@
  * @description This file contains basic implementation to access a CosmosDB instance with a container
  * called 'Logins' to keep track of login events
  */
+
+// eslint-disable-next-line no-unused-vars
+const { Database } = require('@azure/cosmos');
 const { Student } = require('../models/Student');
 const { UserLogin } = require('../models/UserLogin');
 
