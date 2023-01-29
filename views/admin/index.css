@@ -1,0 +1,17 @@
+#options-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.option-item {
+    border: 1px black solid;
+    padding: 0.5rem;
+}
+
+.option-item > p {
+    margin: auto;
+}
+
+.option-item > p:first-of-type {
+    font-weight: bold;
+}
