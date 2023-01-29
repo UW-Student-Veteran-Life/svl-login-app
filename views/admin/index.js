@@ -1,78 +1,220 @@
+import { qs, gen } from '/dom.js';
+import { genBanner } from '/banners.js';
+
 /**
  * Sets initial state of window after it has loaded
  */
-window.addEventListener('load', () => {
-  qs('form').addEventListener('submit', getCsv)
+window.addEventListener('load', async () => {
+  await retrieveOptions();
+  qs('#all-logins').addEventListener('click', getAllLogins);
+  qs('#logins-date').addEventListener('submit', getLoginsByDate);
+  qs('#logins-student').addEventListener('submit', getLoginsByStudent);
+  qs('#option-form').addEventListener('submit', createOption);
 });
 
 /**
- * Pulls data from the database based on the date passed via a form element and downloads via a CSV
- * @param {Event} e
+ * Retrieves all logins ordered by date & time descending and downloads it via a CSV
+ * @param {Event} event The form event that triggered this function call
  */
-async function getCsv(e) {
-  e.preventDefault();
-  const startDate = new Date(e.target.elements['startDate'].value);
-  const endDate = new Date(e.target.elements['endDate'].value);
-  endDate.setUTCHours(23, 59, 59, 999);
+async function getAllLogins(event) {
+  event.preventDefault();
 
-  let request = new URL(window.location.origin + '/student/records');
-  request.searchParams.append('startDate', startDate.toISOString());
-  request.searchParams.append('endDate', endDate.toISOString());
-  const response = await fetch(request);
-  const content = await response.json();
+  const response = await fetch('/api/logins');
 
   if (response.ok) {
-    let csv = "Name,NetId,StudentId,Reason(s), Date, Time\n";
-
-    content.forEach(record => {
-      const date = new Date(record.timestamp);
-      csv += `${record.name},` +
-      `${record.netId},` +
-      `${record.studentId},` +
-      `${record.reason},` +
-      `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()},` +
-      `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}\n`;
-    });
-
-    // Download CSV file
-    let downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', "data:text/plain;charset=utf-8," + encodeURIComponent(csv));
-    downloadAnchor.setAttribute('download', `records.csv`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    document.body.removeChild(downloadAnchor);
+    const data = await response.json();
+    const csv = recordsToCsv(data);
+    downloadCsv(csv);
   } else {
-    alert (content);
+    const responseText = await response.text();
+    genBanner(responseText, qs('main'), 'error');
+
+    setTimeout(() => {
+      qs('main').removeChild(qs('main').firstChild);
+    }, 4000);
+  }
+} 
+
+/**
+ * Pulls data from the database based on the date and downloads it via a CSV
+ * @param {Event} event The form event that triggered this function call
+ */
+async function getLoginsByDate(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+
+  const startDateLocal = new Date(formData.get('startDate'));
+  const endDateLocal = new Date(formData.get('endDate'));
+
+  const request = new URL('/api/logins', window.location.origin);
+  request.searchParams.append('startDate', startDateLocal.toISOString());
+  request.searchParams.append('endDate', endDateLocal.toISOString());
+
+  const response = await fetch(request);
+
+  if (response.ok) {
+    const data = await response.json();
+    const csv = recordsToCsv(data);
+    downloadCsv(csv);
+  } else {
+    const responseText = await response.text();
+    genBanner(responseText, qs('main'), 'error');
+
+    setTimeout(() => {
+      qs('main').removeChild(qs('main').firstChild);
+    }, 4000);
   }
 }
 
 /**
- * Prepends a 0 if value < 10
- * @param {Number} value
- * @returns Normalized value
+ * Pulls data from the database based on a student number and downloads it via a CSV
+ * @param {Event} event The form event that triggered this function call
  */
-function normalizeDateValue(value) {
-  if (value < 10) {
-    return '0' + value;
+async function getLoginsByStudent(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+
+  const studentNumber = formData.get('studentNumber');
+  const response = await fetch(`/api/logins/${studentNumber}`);
+
+  if (response.ok) {
+    const data = await response.json();
+    const csv = recordsToCsv(data);
+    downloadCsv(csv);
+  } else {
+    const responseText = await response.text();
+    genBanner(responseText, qs('main'), 'error');
+
+    setTimeout(() => {
+      qs('main').removeChild(qs('main').firstChild);
+    }, 4000);
   }
-
-  return value;
 }
 
 /**
- * Returns a new element with the given tag name.
- * @param {string} tagName - HTML tag name for new DOM element.
- * @returns {object} New DOM object for given HTML tag.
+ * Parses a set of records and puts them into CSV format perserving original ordering
+ * @param {Array<Object>} records Converts a set of login records to a CSV string
+ * @return {string} Records in CSV format
  */
- function gen(tagName) {
-  return document.createElement(tagName);
+function recordsToCsv(records) {
+  let csv = 'Name,UwNetId,StudentId,Reason(s), Date, Time\n';
+
+  records.forEach(record => {
+    const studentInfo = record.student;
+    const createdAt = new Date(record.createdAt);
+
+    csv += `${studentInfo.name},` +
+    `${studentInfo.uwNetId ?? ''},` +
+    `${studentInfo.number},` +
+    `${record.loginReason},` +
+    `${createdAt.toLocaleDateString()},` +
+    `${createdAt.toLocaleTimeString()}\n`;
+  });
+
+  return csv;
 }
 
 /**
- * Returns the first element that matches the given CSS selector.
- * @param {string} selector - CSS query selector.
- * @returns {object} The first DOM object matching the query.
+ * Downloads a CSV file on the user's browser
+ * @param {string} csv CSV to attach
  */
-function qs(selector) {
-  return document.querySelector(selector);
+function downloadCsv(csv) {
+  // Download CSV file
+  let downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+  downloadAnchor.setAttribute('download', 'records.csv');
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  document.body.removeChild(downloadAnchor);
+}
+
+/**
+ * Retrieves a list of options and appends them to the DOM
+ */
+async function retrieveOptions() {
+  const response = await fetch('/api/options');
+
+  if (response.ok) {
+    const options = await response.json();
+    const parent = qs('#options-container');
+    
+    while (parent.firstChild) {
+      parent.removeChild();
+    }
+
+    options.forEach(option => {
+      const optionContainer = gen('div');
+      const descriptionText = gen('p');
+      const createdAtText = gen('p');
+      const deleteButton = gen('button');
+      deleteButton.addEventListener('click', event => { deleteOption(event, option.id);});
+      deleteButton.innerText = 'Delete option';
+
+      descriptionText.innerText = option.description;
+      createdAtText.innerText = 'Created At: ' + new Date(option.createdAt).toLocaleString();
+
+      optionContainer.appendChild(descriptionText);
+      optionContainer.appendChild(createdAtText);
+      optionContainer.appendChild(deleteButton);
+      optionContainer.classList.add('option-item');
+
+      parent.appendChild(optionContainer);
+    });
+  } else {
+    const responseText = await response.text();
+    genBanner(responseText, qs('main'), 'error');
+
+    setTimeout(() => {
+      qs('main').removeChild(qs('main').firstChild);
+    }, 4000);
+  }
+}
+
+/**
+ * Adds the option to the database and updates the list of options
+ * @param {string} optionDescription Description of the option to add
+ */
+async function createOption(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const optionDescription = formData.get('optionDescription');
+
+  const response = await fetch('/api/options', {
+    method: 'POST',
+    body: JSON.stringify({description: optionDescription})
+  });
+
+  if (response.ok) {
+    await retrieveOptions();
+  } else {
+    const responseText = await response.text();
+    genBanner(responseText, qs('main'), 'error');
+
+    setTimeout(() => {
+      qs('main').removeChild(qs('main').firstChild);
+    }, 4000);
+  }
+}
+
+/**
+ * Deletes an option based on its ID and updates the list of options
+ * @param {Event} event 
+ * @param {string} optionId 
+ */
+async function deleteOption(event, optionId) {
+  event.preventDefault();
+
+  const response = await fetch(`/api/options/${optionId}`, {
+    method: 'DELETE'
+  });
+
+  if (response.ok) {
+    await retrieveOptions();
+  } else {
+    genBanner(response.statusText, qs('main'), 'error');
+
+    setTimeout(() => {
+      qs('main').removeChild(qs('main').firstChild);
+    }, 4000);
+  }
 }
