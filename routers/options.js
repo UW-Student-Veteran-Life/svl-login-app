@@ -17,6 +17,11 @@ router.get('/options', async (req, res) => {
 
 router.post('/options', async (req, res) => {
   const description = req.body.description;
+
+  if (description === undefined) {
+    res.status(400).send('There must be a non-null description included in the request body');
+  }
+
   const descriptionUpper = description.charAt(0).toUpperCase() + description.slice(1);
   const option = new Option(descriptionUpper);
 
