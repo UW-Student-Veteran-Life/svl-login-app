@@ -6,7 +6,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@900&family=Open+Sans&display=swap" rel="stylesheet">
     <link href="/styles/main.css" rel="stylesheet">
-    <script src="index.js"></script>
+    <link href="index.css" rel="stylesheet">
+    <link href="/styles/banner.css" rel="stylesheet">
+
+    <script type="module" src="index.js"></script>
+    <script type="module" src="/dom.js"></script>
   </head>
   <body>
     <nav>
@@ -19,25 +23,44 @@
     </header>
     <main>
       <details>
-        <summary>Pull Records</summary>
-        <form>
+        <summary>Get all logins</summary>
+        <button id="all-logins" type="button">Retrieve all logins</button>
+      </details>
+      <details>
+        <summary>Get logins by date</summary>
+        <p>These dates and times are in local time.</p>
+        <p>Start date is required but end date is optional</p>
+        <form id="logins-date">
           <fieldset>
             <label>
               Start Date:
-              <input type="date" name="startDate" required>
+              <input type="datetime-local" name="startDate" required>
             </label>
           </fieldset>
           <fieldset>
             <label>
               End Date:
-              <input type="date" name="endDate" required>
+              <input type="datetime-local" name="endDate">
             </label>
           </fieldset>
-          <button type="submit">Submit</button>
+          <button type="submit">Retrieve logins</button>
+        </form>
+      </details>
+      <details>
+        <summary>Get logins by student ID</summary>
+        <form id="logins-student">
+          <p>Enter student ID</p>
+          <input name="studentNumber" required>
+          <button type="submit">Get logins</button>
         </form>
       </details>
       <details>
         <summary>Update Options</summary>
+        <form id="option-form">
+          <label>Option Description: <input name="optionDescription" required></label>
+          <button type="submit">Create option</button>
+        </form>
+        <div id="options-container"></div>
       </details>
     </main>
   </body>
