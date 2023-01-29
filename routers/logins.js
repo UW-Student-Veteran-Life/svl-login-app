@@ -17,7 +17,7 @@ router.get('/logins', async (req, res) => {
       res.json(data);
     } else {
       if (endDate == undefined) {
-        const data = await getLoginsByDate(new Date(startDate), null, req.database);
+        const data = await getLoginsByDate(new Date(startDate), req.database);
         res.json(data);
       } else {
         const data = await getLoginsByDate(new Date(startDate), req.database, new Date(endDate));
