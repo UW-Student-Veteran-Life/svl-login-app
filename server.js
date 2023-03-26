@@ -39,7 +39,6 @@ server.use('/api', loginsRouter);
 server.use('/api', optionsRouter);
 
 server.use(express.static('public'));
-server.use(express.static('views'));
 
 http.createServer(server).listen(port, () => {
   console.log(`Server started on port: ${port}`);
