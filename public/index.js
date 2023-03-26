@@ -9,16 +9,31 @@ window.addEventListener('load', async () => {
   qs('#studentIdentifier').focus();
 
   const response = await fetch('/api/options');
-  const content = await response.json();
+
 
   if (response.ok) {
-    content.forEach(option => {
-      const optionValue = gen('option');
-      optionValue.text = option.description;
-      optionValue.value = option.description;
+    const content = await response.json();
+    if (content.length == 0) {
+      genBanner('There are no login options present, please create them in the admin panel', qs('#submission-app'), 'error');
 
-      options.appendChild(optionValue);
-    });
+      setTimeout(() => {
+        qs('#submission-app').removeChild(qs('#submission-app').firstChild);
+      }, 4000);
+    } else {
+      content.forEach(option => {
+        const optionValue = gen('option');
+        optionValue.text = option.description;
+        optionValue.value = option.description;
+  
+        options.appendChild(optionValue);
+      });
+    }
+  } else {
+    genBanner('Unable to contact backend, please contact administrator', qs('#submission-app'), 'error');
+
+    setTimeout(() => {
+      qs('#submission-app').removeChild(qs('#submission-app').firstChild);
+    }, 4000);
   }
 
   qs('#login-form').addEventListener('submit', submitLoginEvent);
