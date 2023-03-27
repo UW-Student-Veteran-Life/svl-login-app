@@ -64,3 +64,8 @@ form > * {
 select, button {
   height: 2em;
 }
+
+#optionsContainer {
+  display: flex;
+  flex-direction: column;
+}
