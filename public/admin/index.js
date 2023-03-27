@@ -97,18 +97,20 @@ async function getLoginsByStudent(event) {
  * @return {string} Records in CSV format
  */
 function recordsToCsv(records) {
-  let csv = 'Name,UwNetId,StudentId,Reason(s), Date, Time\n';
+  let csv = 'Name,UwNetId,StudentId,Login Reason, Date, Time\n';
 
   records.forEach(record => {
     const studentInfo = record.student;
     const createdAt = new Date(record.createdAt);
 
-    csv += `${studentInfo.name},` +
-    `${studentInfo.uwNetId ?? ''},` +
-    `${studentInfo.number},` +
-    `${record.loginReason},` +
-    `${createdAt.toLocaleDateString()},` +
-    `${createdAt.toLocaleTimeString()}\n`;
+    record.loginReasons.forEach(login => {
+      csv += `${studentInfo.name},` +
+      `${studentInfo.uwNetId ?? ''},` +
+      `${studentInfo.number},` +
+      `${login},` +
+      `${createdAt.toLocaleDateString()},` +
+      `${createdAt.toLocaleTimeString()}\n`;
+    });
   });
 
   return csv;
