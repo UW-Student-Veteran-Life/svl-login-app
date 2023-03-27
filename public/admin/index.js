@@ -181,7 +181,10 @@ async function createOption(event) {
 
   const response = await fetch('/api/options', {
     method: 'POST',
-    body: JSON.stringify({description: optionDescription})
+    body: JSON.stringify({description: optionDescription}),
+    headers: {
+      'Content-Type': 'application/json'
+    }
   });
 
   if (response.ok) {
