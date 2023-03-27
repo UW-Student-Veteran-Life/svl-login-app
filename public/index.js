@@ -10,15 +10,10 @@ window.addEventListener('load', async () => {
 
   const response = await fetch('/api/options');
 
-
   if (response.ok) {
     const content = await response.json();
     if (content.length == 0) {
       genBanner('There are no login options present, please create them in the admin panel', qs('#submission-app'), 'error');
-
-      setTimeout(() => {
-        qs('#submission-app').removeChild(qs('#submission-app').firstChild);
-      }, 4000);
     } else {
       content.forEach(option => {
         const optionValue = gen('option');
