@@ -30,7 +30,7 @@ async function getOptions(database) {
   };
 
   let { resources } = await container.items.query(qry).fetchAll();
-  let results = resources.map(record => new Option(record.description, record.created_at, record.id));
+  let results = resources.map(record => new Option(record.description, record.createdAt, record.id));
 
   return results;
 }
