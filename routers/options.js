@@ -1,7 +1,7 @@
 const { addOption, getOptions, deleteOption } = require('../db/options');
 const { Option } = require('../models/Option');
-
 const express = require('express');
+
 const router = express.Router();
 router.use(express.json());
 
@@ -11,6 +11,8 @@ router.get('/options', async (req, res) => {
 
     res.status(200).json(options);
   } catch (e) {
+    console.error('Unable to retrieve list of options');
+    console.error(e);
     res.status(500).send(`There was an error getting the information you requested: ${e}`);
   }
 });
@@ -30,8 +32,11 @@ router.post('/options', async (req, res) => {
     const result = await addOption(option, req.database);
 
     if (result.statusCode >= 200 && result.statusCode < 300) {
+      console.log(`Created a new option: ${descriptionUpper}`);
       res.status(201).json(option);
     } else {
+      console.error('Unable to create a new login option');
+      console.error(result.substatus);
       throw new Error(result.substatus);
     }
   } catch (error) {
