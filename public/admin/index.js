@@ -139,7 +139,7 @@ async function retrieveOptions() {
     const parent = qs('#options-container');
     
     while (parent.firstChild) {
-      parent.removeChild();
+      parent.removeChild(parent.lastChild);
     }
 
     options.forEach(option => {
