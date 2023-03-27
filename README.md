@@ -22,3 +22,15 @@ alterations on the backend.
 A web app running NodeJS is needed to use this application. It is highly recommended to use
 the latest long-term support version of NodeJS offered by Azure as this application does not
 have any requirements to be ran on an older NodeJS runtime.
+
+## Dependencies of Application
+The main dependencies of this application are the following services provided by UW IT:
+- ID Card Reader service
+- Person Search API service
+
+These are both out of scope for this documentation and you may want to reach out to UW IT for 
+further information.
+
+In order to interact with these services, you will need a valid PFX certificate
+granted by UW's certificate authority (known as UWCA). This is also out of scope for
+this documentation but more can be found out by contacting UW IT.
