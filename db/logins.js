@@ -28,13 +28,13 @@ async function addLogin(userLogin, database) {
 async function getAllLogins(database) {
   const container = database.container('Logins');
   const qry = {
-    query: 'SELECT TOP 30 C.student, C.loginReason, C.createdAt FROM Logins C ORDER BY C.createdAt DESC'
+    query: 'SELECT TOP 30 C.student, C.loginReasons, C.createdAt FROM Logins C ORDER BY C.createdAt DESC'
   };
 
   let { resources } = await container.items.query(qry).fetchAll();
   let results = resources.map(record => {
     const student = new Student(record.student.name, record.student.number, record.student.uwNetId);
-    return new UserLogin(student, record.loginReason, record.createdAt);
+    return new UserLogin(student, record.loginReasons, record.createdAt);
   });
 
   return results;
@@ -51,14 +51,14 @@ async function getAllLogins(database) {
 async function getLoginsByDate(startDate, database, endDate = new Date()) {
   const container = database.container('Logins');
   const qry = {
-    query: `SELECT C.student, C.loginReason, C.createdAt FROM Logins C 
+    query: `SELECT C.student, C.loginReasons, C.createdAt FROM Logins C 
     WHERE C.createdAt >= '${startDate.toISOString()}' 
     AND C.createdAt <= '${endDate.toISOString()}' ORDER BY C.createdAt DESC`,
   };
 
   let { resources } = await container.items.query(qry).fetchAll();
   let results = resources.map(record => {
-    return new UserLogin(record.student, record.loginReason, record.createdAt);
+    return new UserLogin(record.student, record.loginReasons, record.createdAt);
   });
 
   return results;
@@ -74,7 +74,7 @@ async function getLoginsByDate(startDate, database, endDate = new Date()) {
 async function getLoginsByStudent(studentNumber, database) {
   const container = database.container('Logins');
   const qry = {
-    query: 'SELECT C.student, C.loginReason, C.createdAt FROM Logins C WHERE C.student.number = @studentNumber ORDER BY C.createdAt DESC',
+    query: 'SELECT C.student, C.loginReasons, C.createdAt FROM Logins C WHERE C.student.number = @studentNumber ORDER BY C.createdAt DESC',
     parameters: [
       {name: '@studentNumber', value: studentNumber}
     ]
@@ -82,7 +82,7 @@ async function getLoginsByStudent(studentNumber, database) {
 
   let { resources } = await container.items.query(qry).fetchAll();
   let results = resources.map(record => {
-    return new UserLogin(record.student, record.loginReason, record.createdAt);
+    return new UserLogin(record.student, record.loginReasons, record.createdAt);
   });
 
   return results;
