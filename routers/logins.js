@@ -43,7 +43,7 @@ router.post('/logins', async (req, res) => {
   const studentIdentifier = req.body.identifier;
   let student;
 
-  if (req.body.reason === undefined) {
+  if (req.body.reasons === undefined) {
     res.status(400).send('Reason not specified in request body');
     return;
   } else if (studentIdentifier === undefined) {
@@ -80,7 +80,7 @@ router.post('/logins', async (req, res) => {
     return;
   }
 
-  const userLogin = new UserLogin(student, req.body.reason);
+  const userLogin = new UserLogin(student, req.body.reasons);
   const item = await addLogin(userLogin, req.database);
 
   if (item.statusCode >= 200 && item.statusCode < 300) {

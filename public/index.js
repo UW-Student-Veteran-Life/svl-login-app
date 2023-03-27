@@ -5,7 +5,7 @@ import { gen, qs } from './dom.js';
  * Set the initial state of the window by populating the login options
  */
 window.addEventListener('load', async () => {
-  let options = qs('select');
+  let options = qs('#optionsContainer');
   qs('#studentIdentifier').focus();
 
   const response = await fetch('/api/options');
@@ -16,11 +16,9 @@ window.addEventListener('load', async () => {
       genBanner('There are no login options present, please create them in the admin panel', qs('#submission-app'), 'error');
     } else {
       content.forEach(option => {
-        const optionValue = gen('option');
-        optionValue.text = option.description;
-        optionValue.value = option.description;
-  
-        options.appendChild(optionValue);
+        const optionLabel = gen('label');
+        optionLabel.innerHTML = `<input type="checkbox" name="loginReason" value="${option.description}"/> ${option.description}`; 
+        options.appendChild(optionLabel);
       });
     }
   } else {
@@ -44,12 +42,12 @@ async function submitLoginEvent(event) {
   const identifierType = classifyIdentifer(data.get('studentIdentifier'));
 
   const body = {
-    reason: data.get('loginReason'),
+    reasons: data.getAll('loginReason'),
     identifier: data.get('studentIdentifier'),
     identifierType: identifierType
   };
 
-  qs('#loginReason').selectedIndex = 0;
+  // qs('#loginReason').selectedIndex = 0;
   qs('#studentIdentifier').value = '';
   qs('#studentIdentifier').focus();
 
