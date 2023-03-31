@@ -53,16 +53,21 @@ router.post('/logins', async (req, res) => {
 
   try {
     if (studentIdentifierType === 'magStripCode') {
-      const regex = new RegExp('.{14}');
-
-      if (!regex.test(studentIdentifier)) {
+      if (!(studentIdentifier.length === 14)) {
         throw new Error(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
       }
 
-      const regId = await searchCard(req.body.identifier, 'mag_strip_code');
+      const regId = await searchCard(studentIdentifier, 'mag_strip_code');
+      student = await getStudentInfo(regId);
+    } else if (studentIdentifierType === 'proxRfid') {
+      if (!(studentIdentifier.length === 16)) {
+        throw new Error(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
+      }
+
+      const regId = await searchCard(studentIdentifier, 'prox_rfid');
       student = await getStudentInfo(regId);
     } else if (studentIdentifierType === 'uwNetId') {
-      student = await getStudentInfo(req.body.identifier, 'net_id');
+      student = await getStudentInfo(studentIdentifier, 'net_id');
     } else if (studentIdentifierType === 'studentId') {
       const regex = new RegExp('[0-9]{7}');
       
@@ -70,9 +75,9 @@ router.post('/logins', async (req, res) => {
         throw new Error(`Identifier ${studentIdentifier} in invalid for type ${studentIdentifierType}`);
       }
 
-      student = await getStudentInfo(req.body.identifier, 'student_number');  
+      student = await getStudentInfo(studentIdentifier, 'student_number');  
     } else {
-      throw new Error(`Identifier type ${req.body.identifierType} is not one of magStripCode, uwNetId, or studentId`);
+      throw new Error(`Identifier type ${studentIdentifierType} is not one of magStripCode, uwNetId, proxRfid, or studentId`);
     }
   } catch (error) {
     console.error(error.message);

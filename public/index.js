@@ -77,16 +77,19 @@ async function submitLoginEvent(event) {
 
 /**
  * Determines the type of identifer. Can be either magStripCode,
- * studentId, or uwNetId
+ * studentId, proxId, or uwNetId.
+ * - magStripCode: code received from a mag strip on a card
+ * - proxId: code received from an RFID scan
  * @param {string} identifier User identifier to classify
  * @returns {string} Classification of the identifier
  */
 function classifyIdentifer(identifier) {
-  const magStrip = new RegExp('.{14}');
   const studentId = new RegExp('[0-9]{7}');
 
-  if (magStrip.test(identifier)) {
+  if (identifier.length === 14) {
     return 'magStripCode';
+  } else if (identifier.length === 16) {
+    return 'proxRfid';
   } else if (studentId.test(identifier)) {
     return 'studentId';
   }
