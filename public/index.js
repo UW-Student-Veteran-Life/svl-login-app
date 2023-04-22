@@ -38,6 +38,7 @@ window.addEventListener('load', async () => {
  */
 async function submitLoginEvent(event) {
   event.preventDefault();
+  genBanner('Logging in...', qs('#submission-app'), 'info');
   const data = new FormData(event.target);
   const identifierType = classifyIdentifer(data.get('studentIdentifier'));
 
@@ -57,6 +58,8 @@ async function submitLoginEvent(event) {
   });
 
   let messageTime = 2000;
+
+  qs('#submission-app').removeChild(qs('#submission-app').firstChild);
 
   if (!response.ok) {
     const responseText = await response.text();
@@ -95,7 +98,7 @@ function classifyIdentifer(identifier) {
 }
 
 /**
- * Resets the state of the login form by unselecting all login options and 
+ * Resets the state of the login form by unselecting all login options and clearing the studentIdentifier input 
  */
 function resetForm() {
   qs('#studentIdentifier').value = '';
