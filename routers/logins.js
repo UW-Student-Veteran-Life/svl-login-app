@@ -3,9 +3,21 @@ const { UserLogin } = require('../models/UserLogin');
 const { getStudentInfo } = require('../services/person-search-api');
 const { searchCard } = require('../services/id-card-api');
 const express = require('express');
+const { isAuthenticated } = require('../utilities/auth');
 
 const router = express.Router();
 router.use(express.json());
+
+// All get requests in this router must be protected by
+// auth challenge as login information can contain FERPA
+// sensitive information
+router.get((req, res, next) => {
+  if (!isAuthenticated(req)) {
+    return res.redirect('/auth/login');
+  }
+
+  next();
+});
 
 router.get('/logins', async (req, res) => {
   const startDate = req.query.startDate;
