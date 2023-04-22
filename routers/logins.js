@@ -55,7 +55,7 @@ router.post('/logins', async (req, res) => {
   const studentIdentifier = req.body.identifier;
   let student;
 
-  if (req.body.reasons === undefined) {
+  if (req.body.reasons === undefined || req.body.reasons.length === 0) {
     res.status(400).send('Reason not specified in request body');
     return;
   } else if (studentIdentifier === undefined) {
