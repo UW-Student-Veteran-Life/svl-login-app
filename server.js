@@ -1,3 +1,8 @@
+/**
+ * @author Harmeet Singh <harm2305@uw.edu>
+ * @description This module is the startup script for the server and handles router setup,
+ * secret retrieval, database connection, and auth configuration
+ */
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const http = require('http');

@@ -1,3 +1,7 @@
+/**
+ * @author Harmeet Singh
+ * @description This module contains implementation to handle auth using MSAL
+ */
 const express = require('express');
 const msal = require('@azure/msal-node');
 

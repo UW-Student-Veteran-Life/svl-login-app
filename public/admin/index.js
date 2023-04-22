@@ -1,3 +1,8 @@
+/**
+ * @author Harmeet Singh <harm2305@uw.edu>
+ * @description This module contains functionality to support the admin panel
+ * such as retrieving and updating options as well as retrieving logins
+ */
 import { qs, gen } from '/dom.js';
 import { genBanner } from '/banners.js';
 

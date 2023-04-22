@@ -1,3 +1,6 @@
+/**
+ * This code stub can be found at https://learn.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-nodejs-webapp-msal
+ */
 const process = require('process');
 
 const msalConfig = {

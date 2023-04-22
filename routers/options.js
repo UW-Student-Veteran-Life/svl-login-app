@@ -1,3 +1,7 @@
+/**
+ * @author Harmeet Singh <harm2305@uw.edu>
+ * @description This module contains a router to retrieve, delete, and create login options
+ */
 const { addOption, getOptions, deleteOption } = require('../db/options');
 const { Option } = require('../models/Option');
 const express = require('express');

@@ -1,3 +1,7 @@
+/**
+ * @author Harmeet Singh <harm2305@uw.edu>
+ * @description This module contains a router to retrieve and create login events
+ */
 const { addLogin, getAllLogins, getLoginsByDate, getLoginsByStudent } = require('../db/logins');
 const { UserLogin } = require('../models/UserLogin');
 const { getStudentInfo } = require('../services/person-search-api');

@@ -1,3 +1,8 @@
+/**
+ * @author Harmeet Singh <harm2305@uw.edu>
+ * @description This module contains implementation to support the sign in app
+ * such as retrieving login options and posting a login event
+ */
 import { genBanner } from './banners.js';
 import { gen, qs } from './dom.js';
 
