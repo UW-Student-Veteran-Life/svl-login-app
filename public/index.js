@@ -47,10 +47,6 @@ async function submitLoginEvent(event) {
     identifierType: identifierType
   };
 
-  // qs('#loginReason').selectedIndex = 0;
-  qs('#studentIdentifier').value = '';
-  qs('#studentIdentifier').focus();
-
   const response = await fetch('/api/logins', {
     method: 'POST',
     cache: 'no-cache',
@@ -68,6 +64,7 @@ async function submitLoginEvent(event) {
     messageTime = 4000;
   } else {
     genBanner(`${data.get('studentIdentifier')} has successfully logged in`, qs('#submission-app'));
+    resetForm();
   }
 
   setTimeout(() => {
@@ -95,4 +92,18 @@ function classifyIdentifer(identifier) {
   }
 
   return 'uwNetId';
+}
+
+/**
+ * Resets the state of the login form by unselecting all login options and 
+ */
+function resetForm() {
+  qs('#studentIdentifier').value = '';
+  qs('#studentIdentifier').focus();
+
+  const options = document.querySelectorAll('input[type="checkbox"]');
+
+  options.forEach(option => {
+    option.checked = false;
+  });
 }
