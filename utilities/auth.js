@@ -12,8 +12,16 @@
  * @param {req} req User request that initiated this authentication challenge
  * @returns {boolean} If a user is authenticated or not
  */
-function isAuthenticated(req) {
-  return req.session.isAuthenticated == true;
+function isAuthenticated(req, role=null) {
+  if (req.session.isAuthenticated !== true) {
+    return false;
+  }
+
+  if (role === null) {
+    return true;
+  }
+
+  return req.session.account.idTokenClaims.roles.includes(role);
 }
 
 module.exports = {
