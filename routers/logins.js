@@ -11,7 +11,7 @@ router.use(express.json());
 // All get requests in this router must be protected by
 // auth challenge as login information can contain FERPA
 // sensitive information
-router.get('*', (req, res, next) => {
+router.get('/logins*', (req, res, next) => {
   if (!isAuthenticated(req, 'Login.Read')) {
     return res.redirect('/auth/login');
   }
