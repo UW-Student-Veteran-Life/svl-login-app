@@ -1,85 +1,36 @@
 # Overview
-This API contains implementation for the the University of Washington's Student Veteran Life log in application.
+This repository contains a full stack application for managing user logins through a kiosk. The 
+application consists of the following resources running on an Azure cloud environment:
+- Web App running NodeJS
+- CosmosDB for NoSQL
+- Azure KeyVault
 
-# API Usage Requirements
+## Infrastructure Overview
+### Azure KeyVault
+The Azure KeyVault is used to contain any database connection strings required by the application.
+Additionally, it also contains the PFX certificate needed to communicate with UW's ID card
+reader and person search API services. For additional information, please contact UW ID
+as this is out of scope for this documentation.
 
-## Authorization Header
-In order for a client to communicate with this API, an authorization header must be present on the request.
-The API uses [HTTP Basic Authorization](https://en.wikipedia.org/wiki/Basic_access_authentication) with
-the credentials being encoded in `base64` using the schema `username:password`. A sample request header is
-included below.
+### CosmosDB for NoSQL
+A CosmosDB instance is used for keeping track of application data such as login events
+or possible login options. It is not necessary that you use the specific `CosmosDB for NoSQL`
+offering, the `CosmosDB for MongoDB` offering may work but it could potentially require 
+alterations on the backend.
 
-```js
-let username = 'username';
-let password = 'password';
-let authCredential = username + ':' + password;
+### Web App running NodeJS
+A web app running NodeJS is needed to use this application. It is highly recommended to use
+the latest long-term support version of NodeJS offered by Azure as this application does not
+have any requirements to be ran on an older NodeJS runtime.
 
-// btoa() is the native JavaScript implementation of string to base64 encoding
-let encodedData = btoa(authCredential);
+## Dependencies of Application
+The main dependencies of this application are the following services provided by UW IT:
+- ID Card Reader service
+- Person Search API service
 
-// encodedData has a value of dXNlcm5hbWU6cGFzc3dvcmQ=
+These are both out of scope for this documentation and you may want to reach out to UW IT for 
+further information.
 
-// Create the set of request headers
-let requestHeaders = new Headers();
-requestHeaders.append('Authorization', `Basic ${encodedData}`);
-
-// Create a request with our headers
-let myRequest = new Request('resource-uri', {
-  method: 'GET',
-  headers: requestHeaders
-});
-
-await fetch(myRequest);
-```
-
-The above example uses a username and password then creates a base64 encoded string to submit to the API
-as a part of the `Authorization` header.
-
-## Requests
-All request parameters are passed in via a JSON body. The API *DOES NOT* use any form data or binary data
-to submit data to the API.
-
-## Responses
-All responses are returned with an appropriate status code as well as a JSON object attached in the response body. Regardless of wehther or not a request was successful, every response has a JSON object with a `text`
-key that can provide more insight if a request fails to go through.
-
-In this case the API returns a 401 (Forbidden) error, you would get a JSON response that looks like:
-```JSON
-{
-  "text": "Authorization credentials are incorrect, please try again."
-}
-```
-
-If you submit a malformed request, you would see something along the lines of:
-```JSON
-{
-  "text": "Please make sure you include all attributes for this request"
-}
-```
-
-**Always check the text of a response if you need more context as to why a request may have failed.**
-
-# Logging a User - POST
-The `/logUser` endpoint is a post request that logs a user's sign in operation.
-
-Each request must have a body as a follows:
-```JSON
-{
-  "name": "Student name",
-  "netid": "Student's net id",
-  "sid": 1234567,
-  "reason": "Studying"
-}
-```
-
-Upon a successful request, the server will return a response that looks like:
-```JSON
-{
-  "name": "Student name",
-  "netid": "Student's net id",
-  "sid": 1234567,
-  "reason": "Studying",
-  "timestamp": "2021-08-30T00:19:15.882Z",
-  "text": "Student name has successfully signed in at Sun Aug 29 2021 17:19:15 GMT-0700 (Pacific Daylight Time)"
-}
-```
+In order to interact with these services, you will need a valid PFX certificate
+granted by UW's certificate authority (known as UWCA). This is also out of scope for
+this documentation but more can be found out by contacting UW IT.
