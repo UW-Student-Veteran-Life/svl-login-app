@@ -21,14 +21,14 @@ async function addLogin(userLogin, database) {
 }
 
 /**
- * Gets the latest 30 logins in the database sorted by creation time descending
+ * Gets all the logins in the database sorted by creation time descending
  * @param {Database} database CosmosDB instance to connect to
  * @returns {Promise<Array<UserLogin>>}
  */
 async function getAllLogins(database) {
   const container = database.container('Logins');
   const qry = {
-    query: 'SELECT TOP 30 C.student, C.loginReasons, C.createdAt FROM Logins C ORDER BY C.createdAt DESC'
+    query: 'SELECT C.student, C.loginReasons, C.createdAt FROM Logins C ORDER BY C.createdAt DESC'
   };
 
   let { resources } = await container.items.query(qry).fetchAll();
