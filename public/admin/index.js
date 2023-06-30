@@ -53,7 +53,10 @@ async function getLoginsByDate(event) {
 
   const request = new URL('/api/logins', window.location.origin);
   request.searchParams.append('startDate', startDateLocal.toISOString());
-  request.searchParams.append('endDate', endDateLocal.toISOString());
+
+  if (!isNaN(endDateLocal.valueOf())) {
+    request.searchParams.append('endDate', endDateLocal.toISOString());
+  }
 
   const response = await fetch(request);
 
