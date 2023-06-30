@@ -34,3 +34,15 @@ further information.
 In order to interact with these services, you will need a valid PFX certificate
 granted by UW's certificate authority (known as UWCA). This is also out of scope for
 this documentation but more can be found out by contacting UW IT.
+
+# Data Retention Policies
+Information stored for this application is [FERPA](https://www2.ed.gov/policy/gen/guid/fpco/ferpa/index.html)
+sensitive. As such, there are data retention policies in place to delete data older than
+a certain timeframe to limit any possible data leakage if it were to happen. The timeframes
+are summarized down below. TTL (time-to-live) in CosmosDB is specified by seconds.
+
+| Environment | Record TTL (time-to-live) |
+|-------------|---------------------------|
+| Production | 7,776,000 seconds (90 days) |
+| Staging | 86,400 seconds (1 day) |
+| Development | 3,600 seconds (1 hour) |
