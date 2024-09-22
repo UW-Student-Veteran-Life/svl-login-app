@@ -4,25 +4,33 @@
  */
 
 /**
- * This function simply checks if the user session is authenticated and if 
- * they have an app role matching the one passed in.
- * 
+ * Checks if the user is authenticated.
  * @param {req} req User request that initiated this authentication challenge
- * @param {role} role The app role required to be matched
  * @returns {boolean} If a user is authenticated or not
  */
-function isAuthenticated(req, role=null) {
-  if (req.session.isAuthenticated !== true) {
-    return false;
-  }
+function isAuthenticated(req) {
+  if (req.session === undefined) return false;
 
-  if (role === null) {
-    return true;
-  }
+  if (req.session.isAuthenticated === undefined) return false;
+
+  return req.session.isAuthenticated;
+}
+
+/**
+ * Checks to ee if a user authorized based on a role name
+ * @param {req} req User request that initiated this authentication challenge
+ * @param {role} role  The app role required to be matched
+ * @returns {boolean} If a user is authorized or not
+ */
+function isAuthorized(req, role) {
+  if (req.session.isAuthenticated === undefined || req.session.isAuthenticated === false) return false;
+
+  if (req.session.account.idTokenClaims.roles === undefined) return false;
 
   return req.session.account.idTokenClaims.roles.includes(role);
 }
 
 module.exports = {
-  isAuthenticated
+  isAuthenticated,
+  isAuthorized
 };

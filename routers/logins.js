@@ -3,11 +3,11 @@
  * @description This module contains a router to retrieve and create login events
  */
 const { addLogin, getAllLogins, getLoginsByDate, getLoginsByStudent } = require('../db/logins');
-const { UserLogin } = require('../models/UserLogin');
+const { UserLogin } = require('../core/UserLogin');
 const { getStudentInfo } = require('../services/person-search-api');
 const { searchCard } = require('../services/id-card-api');
 const express = require('express');
-const { isAuthenticated } = require('../utilities/auth');
+const { isAuthenticated, isAuthorized } = require('../utilities/auth');
 
 const router = express.Router();
 router.use(express.json());
@@ -16,8 +16,12 @@ router.use(express.json());
 // auth challenge as login information can contain FERPA
 // sensitive information
 router.get('/logins*', (req, res, next) => {
-  if (!isAuthenticated(req, 'Login.Read')) {
-    return res.redirect('/auth/login');
+  if (!isAuthenticated(req)) {
+    return res.redirect('/auth/signin');
+  }
+
+  if (!isAuthorized(req, 'Login.Read')) {
+    return res.status(401).send('You do not have the valid permissions to view logins');
   }
 
   next();
