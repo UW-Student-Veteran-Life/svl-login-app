@@ -3,7 +3,7 @@
  * @description This module contains a router to retrieve, delete, and create login options
  */
 const { addOption, getOptions, deleteOption } = require('../db/options');
-const { Option } = require('../models/Option');
+const { Option } = require('../core/Option');
 const express = require('express');
 
 const router = express.Router();

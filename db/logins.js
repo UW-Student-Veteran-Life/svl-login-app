@@ -6,8 +6,8 @@
 
 // eslint-disable-next-line no-unused-vars
 const { Database } = require('@azure/cosmos');
-const { Student } = require('../models/Student');
-const { UserLogin } = require('../models/UserLogin');
+const { Student } = require('../core/Student');
+const { UserLogin } = require('../core/UserLogin');
 
 /**
  * Adds a user login to the 'Logins' collection for the specificed CosmosDB instance

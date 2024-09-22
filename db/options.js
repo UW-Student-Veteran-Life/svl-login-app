@@ -6,7 +6,7 @@
 
 // eslint-disable-next-line no-unused-vars
 const { Database } = require('@azure/cosmos');
-const { Option } = require('../models/Option');
+const { Option } = require('../core/Option');
 
 /**
  * Adds a login option to the 'Options' collection
