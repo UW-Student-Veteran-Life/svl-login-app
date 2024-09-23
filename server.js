@@ -50,7 +50,7 @@ async function startServer() {
   server.use(express.urlencoded({ extended: false }));
   server.use(cookieParser());
 
-  const dbConnSecret = await kvSecretClient.getSecret('db-conn');
+  const dbConnSecret = await kvSecretClient.getSecret('DB_CONN');
   const dbConn = dbConnSecret.value;
   const cosmosClient = new CosmosClient(dbConn);
 
