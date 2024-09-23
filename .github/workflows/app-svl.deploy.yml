@@ -58,10 +58,6 @@ jobs:
         with:
           name: node-app
 
-      - run: ls
-
-      - run: cwd
-
       - uses: qetza/replacetokens-action@v1
         with:
           sources: variables.tf
