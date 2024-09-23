@@ -57,6 +57,14 @@ jobs:
         with:
           name: node-app
 
+      - uses: qetza/replacetokens-action@v1
+        with:
+          sources: variables.tf
+          variables: '[${{ toJSON(vars) }}, ${{ toJSON(secrets) }}]'
+          if-no-files-found: error
+          missing-var-log: error
+          token-pattern: octopus
+
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
