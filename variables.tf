@@ -1,10 +1,16 @@
-variable "allow_destroy" {
-  default = "#{{ALLOW_DESTROY}}" == "1" ? true : false
+variable "arm_client_id" {
+  default   = "#{{ARM_CLIENT_ID}}"
+  sensitive = true
+}
+
+variable "arm_client_secret" {
+  default   = "#{{ARM_CLIENT_SECRET}}"
+  sensitive = true
 }
 
 variable "app_client_id" {
-  default     = "#{{APP_CLIENT_ID}}"
-  sensitive   = true
+  default   = "#{{APP_CLIENT_ID}}"
+  sensitive = true
 }
 
 variable "app_post_logout_redirect" {
@@ -22,7 +28,6 @@ variable "app_session_secret" {
 
 variable "api_root" {
   default   = "#{{API_ROOT}}"
-  sensitive = true
 }
 
 variable "app_client_secret" {
@@ -42,8 +47,21 @@ variable "app_service_name" {
   default = "#{{APP_SERVICE_NAME}}"
 }
 
+variable "azure_sub_id" {
+  default = "#{{AZURE_SUB_ID}}"
+}
+
+variable "azure_tenant_id" {
+  default   = "#{{AZURE_TENANT_ID}}"
+  sensitive = true
+}
+
 variable "db_name" {
   default = "#{{DB_NAME}}"
+}
+
+variable "env_name" {
+  default = "#{{ENV_NAME}}"
 }
 
 variable "key_vault_name" {

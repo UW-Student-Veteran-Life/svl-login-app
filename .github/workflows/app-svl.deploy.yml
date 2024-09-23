@@ -51,6 +51,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{inputs.environment}}
     needs: build
+    env:
+      ARM_USE_OIDC: true
+      ARM_USE_AZUREAD: true
+      ARM_CLIENT_ID: ${{secrets.ARM_CLIENT_ID}}
+      AZURE_SUBSCRIPTION_ID: ${{secrets.AZURE_SUB_ID}}
+      ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
 
     steps:
       - name: Download artifact from build job
