@@ -1,4 +1,5 @@
-name: Build and Validate - ${{github.ref_name}}
+name: Build and Validate
+run-name: ${{github.ref_name}}
 
 on:
     push:
