@@ -1,0 +1,58 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment Name
+        type: choice
+        options:
+          - ADT
+          - QAT
+          - PRD
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{inputs.environment}}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+            terraform_version: "1.9.6"
+
+      - run: terraform init
+        name: Initialize Terraform
+
+      - run: terraform plan
+        name: Plan Terraform
+
+      - run: terraform deploy
+        name: Deploy Terraform
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
+  
+      - name: Delete release.zip
+        run: rm release.zip
+
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'app-svl-prod-westus-001'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C6D7D47A32024485B7B0E8CACABDC455 }}
+          package: .
