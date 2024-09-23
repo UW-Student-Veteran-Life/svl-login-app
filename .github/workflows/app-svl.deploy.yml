@@ -60,7 +60,7 @@ jobs:
 
       - uses: qetza/replacetokens-action@v1
         with:
-          sources: variables.tf
+          sources: "*.tf"
           variables: '[${{ toJSON(vars) }}, ${{ toJSON(secrets) }}]'
           if-no-files-found: error
           missing-var-log: error

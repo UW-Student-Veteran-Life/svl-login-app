@@ -60,10 +60,6 @@ variable "db_name" {
   default = "#{{DB_NAME}}"
 }
 
-variable "env_name" {
-  default = "#{{ENV_NAME}}"
-}
-
 variable "key_vault_name" {
   default = "#{{VAULT_NAME}}"
 }
