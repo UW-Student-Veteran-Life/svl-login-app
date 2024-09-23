@@ -73,6 +73,10 @@ jobs:
           missing-var-log: error
           token-pattern: octopus
 
+      - run: ls
+
+      - run: cwd
+
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
