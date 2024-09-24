@@ -65,7 +65,7 @@ variable "key_vault_name" {
 }
 
 variable "resource_group_location" {
-  default = "#{LOCATION}"
+  default = "#{RESOURCE_GROUP_LOCATION}"
 }
 
 variable "resource_group_name" {
