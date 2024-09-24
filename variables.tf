@@ -64,10 +64,6 @@ variable "key_vault_name" {
   default = "#{{VAULT_NAME}}"
 }
 
-variable "location" {
-  default = "#{{LOCATION}}"
-}
-
 variable "resource_group_location" {
   default = "#{{RESOURCE_GROUP_LOCATION}}"
 }
