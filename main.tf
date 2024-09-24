@@ -31,13 +31,13 @@ resource "azurerm_key_vault" "vault" {
 }
 
 resource "azurerm_key_vault_secret" "azure_client_id" {
-  name         = "AZURE-CLIENT-ID"
+  name         = "APP-CLIENT-ID"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_client_id
 }
 
 resource "azurerm_key_vault_secret" "azure_client_secret" {
-  name         = "AZURE-CLIENT-SECRET"
+  name         = "APP-CLIENT-SECRET"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_client_secret
 }
@@ -141,10 +141,10 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   app_settings = {
-    "API_ROOT": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API_ROOT)",
-    "AZURE_CLIENT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE_CLIENT_ID)",
-    "AZURE_CLIENT_SECRET": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE_SECRET_ID)",
-    "AZURE_TENANT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE_TENANT_ID)",
+    "API_ROOT": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API-ROOT)",
+    "AZURE_CLIENT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-ID)",
+    "AZURE_CLIENT_SECRET": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-SECRET-ID)",
+    "AZURE_TENANT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE-TENANT-ID)",
     "CLOUD_INSTANCE": "https://login.microsoftonline.com/",
     "GRAPH_API_ENDPOINT": "https://graph.microsoft.com/",
     "POST_LOGOUT_REDIRECT_URI": var.app_post_logout_redirect,
