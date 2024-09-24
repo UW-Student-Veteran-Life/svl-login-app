@@ -81,11 +81,9 @@ jobs:
       - run: terraform apply -auto-approve
         name: Apply Terraform
 
-      # - name: 'Deploy to Azure Web App'
-      #   id: deploy-to-webapp
-      #   uses: azure/webapps-deploy@v2
-      #   with:
-      #     app-name: 'app-svl-prod-westus-001'
-      #     slot-name: 'Production'
-      #     publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C6D7D47A32024485B7B0E8CACABDC455 }}
-      #     package: .
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ vars.APP_SERVICE_NAME }}
+          package: src
