@@ -5,7 +5,7 @@ terraform {
       resource_group_name   = "rg-svl-global-westus2"
       storage_account_name  = "sttfsvlstateglobal"
       container_name        = "tf-state"
-      key                   = "svl.#{{ENV_NAME}}.tfstate"
+      key                   = "svl.#{ENV_NAME}.tfstate"
     }
 }
 
