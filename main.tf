@@ -167,5 +167,5 @@ resource "azurerm_linux_web_app" "app" {
 resource "azurerm_role_assignment" "app_secrets" {
   scope                 = azurerm_key_vault.vault.id
   role_definition_name  = "Key Vault Secrets Officer"
-  principal_id          = azurerm_linux_web_app.app.id
+  principal_id          = azurerm_linux_web_app.app.identity[0].principal_id
 }
