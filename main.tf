@@ -73,7 +73,7 @@ resource "azurerm_key_vault_secret" "app_session_secret" {
 
 resource "azurerm_cosmosdb_account" "cosmos" {
   name                = var.db_name
-  resource_group_name = azurerm_resource_group.group.location
+  resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
   offer_type          = "Standard"
 
