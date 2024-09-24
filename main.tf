@@ -30,31 +30,42 @@ resource "azurerm_key_vault" "vault" {
   enable_rbac_authorization = true
 }
 
+resource "azurerm_role_assignment" "key_vault_admin" {
+  scope                 = azurerm_key_vault.vault.id
+  role_definition_name  = "Key Vault Administrator"
+  principal_id          = data.azurerm_client_config.current.id
+}
+
 resource "azurerm_key_vault_secret" "azure_client_id" {
+  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
   name         = "APP-CLIENT-ID"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_client_id
 }
 
 resource "azurerm_key_vault_secret" "azure_client_secret" {
+  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
   name         = "APP-CLIENT-SECRET"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_client_secret
 }
 
 resource "azurerm_key_vault_secret" "azure_tenant_id" {
+  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
   name         = "AZURE-TENANT-ID"
   key_vault_id = azurerm_key_vault.vault.id
   value        = data.azurerm_client_config.current.tenant_id
 }
 
 resource "azurerm_key_vault_secret" "api_root" {
+  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
   name         = "API-ROOT"
   key_vault_id = azurerm_key_vault.vault.id
   value        = data.azurerm_client_config.current.tenant_id
 }
 
 resource "azurerm_key_vault_secret" "app_session_secret" {
+  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
   name         = "APP-SESSION-SECRET"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_session_secret
