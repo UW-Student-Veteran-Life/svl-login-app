@@ -47,15 +47,6 @@ variable "app_service_name" {
   default = "#{APP_SERVICE_NAME}"
 }
 
-variable "azure_sub_id" {
-  default = "#{AZURE_SUB_ID}"
-}
-
-variable "azure_tenant_id" {
-  default   = "#{AZURE_TENANT_ID}"
-  sensitive = true
-}
-
 variable "db_name" {
   default = "#{DB_NAME}"
 }
