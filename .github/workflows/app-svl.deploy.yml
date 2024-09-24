@@ -78,7 +78,7 @@ jobs:
       - run: terraform plan
         name: Plan Terraform
 
-      - run: terraform apply
+      - run: terraform apply -auto-approve
         name: Apply Terraform
 
       # - name: 'Deploy to Azure Web App'
