@@ -63,7 +63,7 @@ jobs:
           variables: '[${{ toJSON(vars) }}, ${{ toJSON(secrets) }}]'
           if-no-files-found: error
           missing-var-log: error
-          token-pattern: githubactions
+          token-pattern: octopus
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
