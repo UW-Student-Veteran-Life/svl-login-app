@@ -22,7 +22,7 @@ resource "azurerm_resource_group" "group" {
 
 resource "azurerm_key_vault" "vault" {
   name                      = var.key_vault_name
-  resource_group_name       = azurerm_resource_group.group.location
+  resource_group_name       = azurerm_resource_group.group.name
   location                  = azurerm_resource_group.group.location
   tenant_id                 = data.azurerm_client_config.current.tenant_id
 
