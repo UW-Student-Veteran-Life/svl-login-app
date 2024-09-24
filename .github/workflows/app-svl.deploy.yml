@@ -32,8 +32,8 @@ jobs:
 
       - name: npm install and build
         run: |
-          npm install
-          npm run build --if-present
+          npm --prefix src install
+          npm --prefix src run build --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -81,11 +81,11 @@ jobs:
       - run: terraform apply
         name: Apply Terraform
 
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'app-svl-prod-westus-001'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C6D7D47A32024485B7B0E8CACABDC455 }}
-          package: .
+      # - name: 'Deploy to Azure Web App'
+      #   id: deploy-to-webapp
+      #   uses: azure/webapps-deploy@v2
+      #   with:
+      #     app-name: 'app-svl-prod-westus-001'
+      #     slot-name: 'Production'
+      #     publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C6D7D47A32024485B7B0E8CACABDC455 }}
+      #     package: .
