@@ -39,7 +39,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: ./*
+          path: |
+            src
+            *.tf
 
   deploy:
     runs-on: ubuntu-latest
@@ -76,8 +78,8 @@ jobs:
       - run: terraform plan
         name: Plan Terraform
 
-      - run: terraform deploy
-        name: Deploy Terraform
+      - run: terraform apply
+        name: Apply Terraform
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
