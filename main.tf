@@ -33,7 +33,7 @@ resource "azurerm_key_vault" "vault" {
 resource "azurerm_role_assignment" "key_vault_admin" {
   scope                 = azurerm_key_vault.vault.id
   role_definition_name  = "Key Vault Administrator"
-  principal_id          = data.azurerm_client_config.current.id
+  principal_id          = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_key_vault_secret" "azure_client_id" {
