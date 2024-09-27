@@ -159,8 +159,8 @@ resource "azurerm_linux_web_app" "app" {
     "CLOUD_INSTANCE": "https://login.microsoftonline.com/",
     "GRAPH_API_ENDPOINT": "https://graph.microsoft.com/",
     "POST_LOGOUT_REDIRECT_URI": var.app_post_logout_redirect,
-    "REDIRECT_URI": "http://localhost:8080/auth/redirect",
-    "VAULT_URI": var.app_redirect_uri
+    "REDIRECT_URI": var.app_redirect_uri,
+    "VAULT_URI": azurerm_key_vault.vault.vault_uri
   }
 }
 
