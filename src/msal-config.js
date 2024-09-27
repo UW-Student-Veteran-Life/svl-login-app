@@ -5,9 +5,9 @@ const process = require('process');
 
 const msalConfig = {
   auth: {
-    clientId: process.env.AZURE_CLIENT_ID, // 'Application (client) ID' of app registration in Azure portal - this value is a GUID
-    authority: process.env.CLOUD_INSTANCE + process.env.AZURE_TENANT_ID, // Full directory URL, in the form of https://login.microsoftonline.com/<tenant>
-    clientSecret: process.env.AZURE_CLIENT_SECRET // Client secret generated from the app registration in Azure portal
+    clientId: process.env.MSAL_CLIENT_ID, // 'Application (client) ID' of app registration in Azure portal - this value is a GUID
+    authority: process.env.CLOUD_INSTANCE + process.env.MSAL_TENANT_ID, // Full directory URL, in the form of https://login.microsoftonline.com/<tenant>
+    clientSecret: process.env.MSAL_CLIENT_SECRET // Client secret generated from the app registration in Azure portal
   },
   system: {
     loggerOptions: {
