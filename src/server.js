@@ -16,6 +16,7 @@ const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 
 const port = process.env.PORT || 8080;
+console.log('Server port number %d', port);
 
 const authRouter = require('./routers/auth');
 const loginsRouter = require('./routers/logins');
@@ -45,11 +46,13 @@ async function startServer() {
   }));
 
   // Router middleware setup
+  console.log('Initializing middleware');
   server.use(morgan('combined'));
   server.use(express.json());
   server.use(express.urlencoded({ extended: false }));
   server.use(cookieParser());
 
+  console.log('Creating database connection');
   const dbConnSecret = await kvSecretClient.getSecret('DB_CONN');
   const dbConn = dbConnSecret.value;
   const cosmosClient = new CosmosClient(dbConn);
@@ -74,8 +77,10 @@ async function startServer() {
     next();
   });
 
+  console.log('Adding middleware for public static assets');
   server.use(express.static('public'));
 
+  console.log('Initiating http server');
   http.createServer(server).listen(port, () => {
     console.log(`Server started on port: ${port}`);
   });
