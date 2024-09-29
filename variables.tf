@@ -62,3 +62,8 @@ variable "resource_group_location" {
 variable "resource_group_name" {
   default = "#{RESOURCE_GROUP_NAME}"
 }
+
+variable "uw_cert" {
+  default = "#{UW_CERT}"
+  sensitive = true
+}
