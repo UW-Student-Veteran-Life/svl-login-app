@@ -61,7 +61,7 @@ resource "azurerm_key_vault_secret" "api_root" {
   depends_on   = [ azurerm_role_assignment.key_vault_admin ]
   name         = "API-ROOT"
   key_vault_id = azurerm_key_vault.vault.id
-  value        = data.azurerm_client_config.current.tenant_id
+  value        = var.api_root
 }
 
 resource "azurerm_key_vault_secret" "app_session_secret" {
