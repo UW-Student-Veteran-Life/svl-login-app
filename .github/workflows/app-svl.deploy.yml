@@ -90,5 +90,5 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ vars.APP_SERVICE_NAME }}
+          app-name: app-svl-${{vars.ENV_NAME}}-${{vars.RESOURCE_GROUP_LOCATION}}
           package: src
