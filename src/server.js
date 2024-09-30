@@ -34,7 +34,7 @@ async function startServer() {
   // Remove the x-powered-by header for security reasons
   server.set('x-powered-by', false);
 
-  const sessionSecret = await kvSecretClient.getSecret('app-session-secret');
+  const sessionSecret = await kvSecretClient.getSecret('APP-SESSION-SECRET');
   server.use(sessions({
     secret: sessionSecret.value,
     resave: false,
@@ -53,7 +53,7 @@ async function startServer() {
   server.use(cookieParser());
 
   console.log('Creating database connection');
-  const dbConnSecret = await kvSecretClient.getSecret('DB_CONN');
+  const dbConnSecret = await kvSecretClient.getSecret('DB-CONN');
   const dbConn = dbConnSecret.value;
   const cosmosClient = new CosmosClient(dbConn);
 
