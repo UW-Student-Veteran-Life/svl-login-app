@@ -71,37 +71,46 @@ router.post('/logins', async (req, res) => {
     return;
   }
 
+  const identifierMappings = {
+    'magStripCode': 'mag_strip_code',
+    'proxRfid': 'prox_rfid',
+    'uwNetId': 'net_id',
+    'studentId': 'student_number'
+  };
+
+  if (!Object.keys(identifierMappings).includes(studentIdentifierType)) {
+    res.status(400).send(`Identifier type ${studentIdentifierType} is not one of magStripCode, uwNetId, proxRfid, or studentId`);
+    return;
+  }
+
   try {
-    if (studentIdentifierType === 'magStripCode') {
-      if (!(studentIdentifier.length === 14)) {
-        throw new Error(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
-      }
+    let identiferIsValid = true;
+    const sidRegex = new RegExp('[0-9]{7}');
 
-      const regId = await searchCard(studentIdentifier, 'mag_strip_code');
-      student = await getStudentInfo(regId);
-    } else if (studentIdentifierType === 'proxRfid') {
-      if (!(studentIdentifier.length === 16)) {
-        throw new Error(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
-      }
+    if (studentIdentifierType === 'magStripCode' && !(studentIdentifier.length === 14)) identiferIsValid = false;
+    if (studentIdentifierType === 'proxRfid' && !(studentIdentifier.length === 16)) identiferIsValid = false;
+    if (studentIdentifierType === 'studentId' && !sidRegex.test(studentIdentifier)) identiferIsValid = false;
 
-      const regId = await searchCard(studentIdentifier, 'prox_rfid');
-      student = await getStudentInfo(regId);
-    } else if (studentIdentifierType === 'uwNetId') {
-      student = await getStudentInfo(studentIdentifier, 'net_id');
-    } else if (studentIdentifierType === 'studentId') {
-      const regex = new RegExp('[0-9]{7}');
+    if (!identiferIsValid) {
+      console.log(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
+      res.status(400).send(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
+      return;
+    }
+
+
+    if (studentIdentifierType === 'magStripCode' || studentIdentifierType === 'proxRfid') {
+      console.log(`Performing search for identifier ${studentIdentifier} using type ${studentIdentifierType}`);
+      const regId = await searchCard(studentIdentifier, identifierMappings[studentIdentifierType]);
       
-      if (!regex.test(studentIdentifier)) {
-        throw new Error(`Identifier ${studentIdentifier} in invalid for type ${studentIdentifierType}`);
-      }
-
-      student = await getStudentInfo(studentIdentifier, 'student_number');  
+      console.log(`Retrieving student information for identifier ${regId} using type reg_id`);
+      student = await getStudentInfo(regId);
     } else {
-      throw new Error(`Identifier type ${studentIdentifierType} is not one of magStripCode, uwNetId, proxRfid, or studentId`);
+      console.log(`Retrieving student information for identifier ${studentIdentifier} using type ${identifierMappings[studentIdentifierType]}`);
+      student = await getStudentInfo(studentIdentifier, identifierMappings[studentIdentifierType]);
     }
   } catch (error) {
-    console.error(error.message);
-    res.status(400).send(error.message);
+    console.error(error);
+    res.status(500).send(error.message);
     return;
   }
 
