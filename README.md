@@ -43,6 +43,6 @@ are summarized down below. TTL (time-to-live) in CosmosDB is specified by second
 
 | Environment | Record TTL (time-to-live) |
 |-------------|---------------------------|
-| Production | 7,776,000 seconds (90 days) |
-| Staging | 86,400 seconds (1 day) |
-| Development | 3,600 seconds (1 hour) |
+| PRD | 7,776,000 seconds (90 days) |
+| QAT | 86,400 seconds (1 day) |
+| ADT | 3,600 seconds (1 hour) |
