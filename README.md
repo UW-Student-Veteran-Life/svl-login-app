@@ -35,6 +35,33 @@ In order to interact with these services, you will need a valid PFX certificate
 granted by UW's certificate authority (known as UWCA). This is also out of scope for
 this documentation but more can be found out by contacting UW IT.
 
+# Generating a Certificate for API Access
+The ID Card Reader service and Person Search APIs are both secured via certificate authenication.
+Certificates can be retrieved via the UW's [IAM Tools Service](https://iam-tools.u.washington.edu/cs/).
+
+Once you have retrieved your certificate, perform the following steps to import the certificate
+into the key vault:
+1. Extract the certificate using `openssl pkcs12 -in your-cert.p12 -out newfile.crt.pem -nokeys`
+    - This extracts the certificate without the private key into a base64 string
+2. Extract the private key using `openssl pkcs12 -in your-cert.p12 -out newfile.key.pem -nocerts -nodes`
+    - This extracts the private key into a base64 string
+    - **CAUTION**: The `-nodes` option means to output the private key without encryption. Be 
+    careful not to expose the output of this command to parties who should not have it.
+3. Copy the certificate in `newfile.crt.pem` and the key from `newfile.key.pem` into a new file
+`cert.pem` which will contain the certificate to be loaded into the key vault
+    - Copy only the contents between `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`
+    as well as `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`, omit
+    any bag attributes if present
+4. Import the file into the key vault
+
+## Deploying via Terraform
+If you intend on deploying the certificate as a Terraform `azurerm` resource, complete the above steps
+and then replace all newline characters in `cert.pem` with a literal `\n`. This can be done
+trivially with `awk '{printf "%s\\n", $0}' cert.pem` in a bash terminal.
+
+The output of the above command should then be stored in as secret value in your build pipeline can be
+used in Terraform via the `azurerm_key_vault_certificate`.
+
 # Data Retention Policies
 Information stored for this application is [FERPA](https://www2.ed.gov/policy/gen/guid/fpco/ferpa/index.html)
 sensitive. As such, there are data retention policies in place to delete data older than
