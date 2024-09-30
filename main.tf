@@ -16,12 +16,12 @@ provider "azurerm" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "group" {
-    name        = var.resource_group_name
+    name        = "rg-svl-${var.env_name}-${var.resource_group_location}"
     location    = var.resource_group_location
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                      = var.key_vault_name
+  name                      = "kv-svl-${var.env_name}-${azurerm_resource_group.group.location}"
   resource_group_name       = azurerm_resource_group.group.name
   location                  = azurerm_resource_group.group.location
   tenant_id                 = data.azurerm_client_config.current.tenant_id
@@ -82,7 +82,7 @@ resource "azurerm_key_vault_certificate" "uw_cert" {
 }
 
 resource "azurerm_cosmosdb_account" "cosmos" {
-  name                = var.db_name
+  name                = "cosmos-svl-${var.env_name}-${azurerm_resource_group.group.location}"
   resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
   offer_type          = "Standard"
@@ -135,7 +135,7 @@ resource "azurerm_cosmosdb_sql_container" "options" {
 }
 
 resource "azurerm_service_plan" "plan" {
-  name                = var.app_plan_name
+  name                = "asp-svl-${var.env_name}-${azurerm_resource_group.group.location}"
   resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
   os_type             = "Linux"
@@ -143,7 +143,7 @@ resource "azurerm_service_plan" "plan" {
 }
 
 resource "azurerm_linux_web_app" "app" {
-  name                = var.app_service_name
+  name                = "app-svl-${var.env_name}-${azurerm_resource_group.group.location}"
   resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
   service_plan_id     = azurerm_service_plan.plan.id

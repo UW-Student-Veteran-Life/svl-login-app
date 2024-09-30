@@ -35,32 +35,16 @@ variable "app_client_secret" {
   sensitive   = true
 }
 
-variable "app_plan_name" {
-  default = "#{APP_PLAN_NAME}"
-}
-
 variable "app_plan_sku" {
   default = "#{APP_PLAN_SKU}"
 }
 
-variable "app_service_name" {
-  default = "#{APP_SERVICE_NAME}"
-}
-
-variable "db_name" {
-  default = "#{DB_NAME}"
-}
-
-variable "key_vault_name" {
-  default = "#{VAULT_NAME}"
+variable "env_name" {
+  default = "#{ENV_NAME}"
 }
 
 variable "resource_group_location" {
   default = "#{RESOURCE_GROUP_LOCATION}"
-}
-
-variable "resource_group_name" {
-  default = "#{RESOURCE_GROUP_NAME}"
 }
 
 variable "uw_cert" {
