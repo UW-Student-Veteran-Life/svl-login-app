@@ -83,21 +83,20 @@ router.post('/logins', async (req, res) => {
     return;
   }
 
+  let identiferIsValid = true;
+  const sidRegex = new RegExp('[0-9]{7}');
+
+  if (studentIdentifierType === 'magStripCode' && !(studentIdentifier.length === 14)) identiferIsValid = false;
+  if (studentIdentifierType === 'proxRfid' && !(studentIdentifier.length === 16)) identiferIsValid = false;
+  if (studentIdentifierType === 'studentId' && !sidRegex.test(studentIdentifier)) identiferIsValid = false;
+
+  if (!identiferIsValid) {
+    console.log(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
+    res.status(400).send(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
+    return;
+  }
+
   try {
-    let identiferIsValid = true;
-    const sidRegex = new RegExp('[0-9]{7}');
-
-    if (studentIdentifierType === 'magStripCode' && !(studentIdentifier.length === 14)) identiferIsValid = false;
-    if (studentIdentifierType === 'proxRfid' && !(studentIdentifier.length === 16)) identiferIsValid = false;
-    if (studentIdentifierType === 'studentId' && !sidRegex.test(studentIdentifier)) identiferIsValid = false;
-
-    if (!identiferIsValid) {
-      console.log(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
-      res.status(400).send(`Identifier ${studentIdentifier} is invalid for type ${studentIdentifierType}`);
-      return;
-    }
-
-
     if (studentIdentifierType === 'magStripCode' || studentIdentifierType === 'proxRfid') {
       console.log(`Performing search for identifier ${studentIdentifier} using type ${studentIdentifierType}`);
       const regId = await searchCard(studentIdentifier, identifierMappings[studentIdentifierType]);
