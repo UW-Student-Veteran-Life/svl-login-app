@@ -178,7 +178,8 @@ resource "azurerm_linux_web_app" "app" {
     "GRAPH_API_ENDPOINT": "https://graph.microsoft.com/",
     "POST_LOGOUT_REDIRECT_URI": var.app_post_logout_redirect,
     "REDIRECT_URI": var.app_redirect_uri,
-    "VAULT_URI": azurerm_key_vault.vault.vault_uri
+    "VAULT_URI": azurerm_key_vault.vault.vault_uri,
+    "WEBSITE_RUN_FROM_PACKAGE": 1
   }
 }
 
