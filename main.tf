@@ -170,7 +170,7 @@ resource "azurerm_linux_web_app" "app" {
 
   app_settings = {
     "API_ROOT": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API-ROOT)",
-    "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.instrumentation_key,
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.connection_string,
     "MSAL_CLIENT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-ID)",
     "MSAL_CLIENT_SECRET": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-SECRET)",
     "MSAL_TENANT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE-TENANT-ID)",
