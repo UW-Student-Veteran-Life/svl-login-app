@@ -76,9 +76,14 @@ jobs:
           npm install
         working-directory: src
 
+      - name: Create ZIP Package
+        if: ${{!inputs.destory}}
+        run: |
+          zip -r app.zip src
+
       - name: 'Deploy to Azure Web App'
         if: ${{!inputs.destory}}
         uses: azure/webapps-deploy@v3
         with:
           app-name: app-svl-${{vars.ENV_NAME}}-${{vars.RESOURCE_GROUP_LOCATION}}
-          package: src
+          package: app.zip
