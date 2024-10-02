@@ -116,10 +116,6 @@ resource "azurerm_cosmosdb_sql_container" "logins" {
   database_name       = azurerm_cosmosdb_sql_database.database.name
   partition_key_paths = ["/id"]
   default_ttl         = 86400
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_cosmosdb_sql_container" "options" {
@@ -128,10 +124,6 @@ resource "azurerm_cosmosdb_sql_container" "options" {
   account_name        = azurerm_cosmosdb_account.cosmos.name
   database_name       = azurerm_cosmosdb_sql_database.database.name
   partition_key_paths = ["/id"]
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_application_insights" "logs" {
