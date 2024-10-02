@@ -10,10 +10,15 @@ on:
       environment:
         description: Environment Name
         type: choice
+        default: ADT
         options:
           - ADT
           - QAT
           - PRD
+      destory:
+        description: Destory Infrastructure
+        type: boolean
+        default: false
 
 jobs:
   deploy:
@@ -50,8 +55,13 @@ jobs:
       - name: Initialize Terraform
         run: terraform init
 
-      - name: Apply Terraform
+      - name: Terraform Apply
+        if: ${{!inputs.destory}}
         run: terraform apply -auto-approve
+
+      - name: Terraform Destory
+        if: ${{inputs.destory}}
+        run: terraform destroy -auto-approve
 
       - name: Setup Node 20.x
         uses: actions/setup-node@v4
