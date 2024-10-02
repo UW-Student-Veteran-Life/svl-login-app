@@ -23,6 +23,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    name: Deploy
     environment: ${{inputs.environment}}
     env:
       ARM_CLIENT_ID: ${{secrets.ARM_CLIENT_ID}}
