@@ -60,7 +60,7 @@ jobs:
         if: ${{!inputs.destory}}
         run: terraform apply -auto-approve
 
-      - name: Terraform Destory
+      - name: Terraform Destroy
         if: ${{inputs.destory}}
         run: terraform destroy -auto-approve
 
