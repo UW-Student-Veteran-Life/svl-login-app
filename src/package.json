@@ -27,6 +27,7 @@
     "express": "^4.21.0",
     "express-session": "^1.18.0",
     "morgan": "^1.10.0",
+    "node": "20.18.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
