@@ -151,6 +151,8 @@ resource "azurerm_linux_web_app" "app" {
     # If app plan sku is Free, F1, D1, or Shared, turn off always_on
     always_on = contains(["Free", "F1", "D1", "Shared"], azurerm_service_plan.plan.sku_name) ? false : true
 
+    app_command_line = "node /home/site/wwwroot/server.js"
+
     application_stack {
       node_version = "20-lts"
     }
