@@ -46,8 +46,3 @@ variable "env_name" {
 variable "resource_group_location" {
   default = "#{RESOURCE_GROUP_LOCATION}"
 }
-
-variable "uw_cert" {
-  default = "#{UW_CERT}"
-  sensitive = true
-}

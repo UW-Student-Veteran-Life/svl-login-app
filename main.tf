@@ -71,16 +71,6 @@ resource "azurerm_key_vault_secret" "app_session_secret" {
   value        = var.app_session_secret
 }
 
-resource "azurerm_key_vault_certificate" "uw_cert" {
-  depends_on    = [ azurerm_role_assignment.key_vault_admin ]
-  name          = "svlcardreader-vetlife-washington-edu"
-  key_vault_id  = azurerm_key_vault.vault.id
-
-  certificate {
-    contents    = var.uw_cert
-  }
-}
-
 resource "azurerm_cosmosdb_account" "cosmos" {
   name                = "cosmos-svl-${var.env_name}-${azurerm_resource_group.group.location}"
   resource_group_name = azurerm_resource_group.group.name
