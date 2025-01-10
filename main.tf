@@ -19,12 +19,12 @@ data "azurerm_client_config" "current" {}
 ##### Global #####
 ##################
 resource "azurerm_resource_group" "global" {
-  name     = "rg-svl-global-${var.global_resource_group_location}"
+  name     = "rg-svl-global-app-${var.global_resource_group_location}"
   location = var.global_resource_group_location
 }
 
 resource "azurerm_service_plan" "plan" {
-  name                = "asp-svl-global-${azurerm_resource_group.global.location}"
+  name                = "asp-svl-global-app-${azurerm_resource_group.global.location}"
   resource_group_name = azurerm_resource_group.global.name
   location            = azurerm_resource_group.global.location
   os_type             = "Linux"
