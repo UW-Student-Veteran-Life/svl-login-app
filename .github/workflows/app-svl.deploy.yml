@@ -65,7 +65,7 @@ jobs:
         run: terraform apply -auto-approve
 
       - name: Terraform Destroy
-        if: ${{inputs.destroy}}
+        if: ${{inputs.destroy && !(inputs.environment == 'PRD')}}
         run: terraform destroy -auto-approve
 
       - name: Setup Node 20.x

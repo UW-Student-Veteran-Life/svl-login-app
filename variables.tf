@@ -43,6 +43,10 @@ variable "env_name" {
   default = "#{ENV_NAME}"
 }
 
+variable "global_resource_group_location" {
+  default = "#{GLOBAL_RESOURCE_GROUP_LOCATION}"
+}
+
 variable "resource_group_location" {
   default = "#{RESOURCE_GROUP_LOCATION}"
 }

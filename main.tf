@@ -15,9 +15,28 @@ provider "azurerm" {
 
 data "azurerm_client_config" "current" {}
 
+##################
+##### Global #####
+##################
+resource "azurerm_resource_group" "global" {
+  name     = "rg-svl-global-app-${var.global_resource_group_location}"
+  location = var.global_resource_group_location
+}
+
+resource "azurerm_service_plan" "plan" {
+  name                = "asp-svl-global-app-${azurerm_resource_group.global.location}"
+  resource_group_name = azurerm_resource_group.global.name
+  location            = azurerm_resource_group.global.location
+  os_type             = "Linux"
+  sku_name            = "B1"
+}
+
+##################
+### Environment ##
+##################
 resource "azurerm_resource_group" "group" {
-    name        = "rg-svl-${var.env_name}-${var.resource_group_location}"
-    location    = var.resource_group_location
+  name      = "rg-svl-${var.env_name}-${var.resource_group_location}"
+  location  = var.resource_group_location
 }
 
 resource "azurerm_key_vault" "vault" {
@@ -84,7 +103,11 @@ resource "azurerm_cosmosdb_account" "cosmos" {
 
   consistency_policy {
     consistency_level = "Session"
-    }
+  }
+
+  capabilities {
+    name = "EnableServerless"
+  }
 }
 
 resource "azurerm_key_vault_secret" "cosmos" {
@@ -121,14 +144,6 @@ resource "azurerm_application_insights" "logs" {
   location            = azurerm_resource_group.group.location
   resource_group_name = azurerm_resource_group.group.name
   application_type    = "Node.JS"
-}
-
-resource "azurerm_service_plan" "plan" {
-  name                = "asp-svl-${var.env_name}-${azurerm_resource_group.group.location}"
-  resource_group_name = azurerm_resource_group.group.name
-  location            = azurerm_resource_group.group.location
-  os_type             = "Linux"
-  sku_name            = var.app_plan_sku
 }
 
 resource "azurerm_linux_web_app" "app" {
