@@ -84,7 +84,11 @@ resource "azurerm_cosmosdb_account" "cosmos" {
 
   consistency_policy {
     consistency_level = "Session"
-    }
+  }
+
+  capabilities {
+    name = "EnableServerless"
+  }
 }
 
 resource "azurerm_key_vault_secret" "cosmos" {
