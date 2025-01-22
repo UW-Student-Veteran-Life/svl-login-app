@@ -5,7 +5,7 @@ terraform {
       resource_group_name   = "rg-svl-global-westus2"
       storage_account_name  = "sttfsvlstateglobal"
       container_name        = "tf-state"
-      key                   = "svl.tfstate"
+      key                   = "svl.#{ENV_NAME}.tfstate"
     }
 }
 
@@ -19,28 +19,17 @@ provider "azurerm" {
 
 data "azurerm_client_config" "current" {}
 
-##################
-##### Global #####
-##################
-resource "azurerm_resource_group" "global" {
-  name     = "rg-svl-global-app-${var.global_resource_group_location}"
-  location = var.global_resource_group_location
-}
-
-resource "azurerm_service_plan" "plan" {
-  name                = "asp-svl-global-app-${azurerm_resource_group.global.location}"
-  resource_group_name = azurerm_resource_group.global.name
-  location            = azurerm_resource_group.global.location
-  os_type             = "Linux"
-  sku_name            = "B1"
-}
-
-##################
-### Environment ##
-##################
 resource "azurerm_resource_group" "group" {
   name      = "rg-svl-${var.env_name}-${var.resource_group_location}"
   location  = var.resource_group_location
+}
+
+resource "azurerm_service_plan" "plan" {
+  name                = "asp-svl-app-${azurerm_resource_group.group.location}"
+  resource_group_name = azurerm_resource_group.group.name
+  location            = azurerm_resource_group.group.location
+  os_type             = "Linux"
+  sku_name            = var.app_plan_sku
 }
 
 resource "azurerm_key_vault" "vault" {
