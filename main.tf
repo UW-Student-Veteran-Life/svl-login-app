@@ -115,6 +115,7 @@ resource "azurerm_cosmosdb_account" "cosmos" {
 }
 
 resource "azurerm_key_vault_secret" "cosmos" {
+  depends_on = [ azurerm_role_assignment.key_vault_admin ]
   key_vault_id  = azurerm_key_vault.vault.id
   name          = "DB-CONN"
   value         = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
