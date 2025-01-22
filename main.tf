@@ -25,7 +25,7 @@ resource "azurerm_resource_group" "group" {
 }
 
 resource "azurerm_service_plan" "plan" {
-  name                = "asp-svl-${azurerm_resource_group.group.location}"
+  name                = "asp-svl-${var.env_name}-${azurerm_resource_group.group.location}"
   resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
   os_type             = "Linux"
