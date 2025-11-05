@@ -10,6 +10,7 @@ const {
   REDIRECT_URI,
   POST_LOGOUT_REDIRECT_URI
 } = require('../msal-config');
+const { isAuthenticated, isAuthorized } = require('../utilities/auth');
 
 const router = express.Router();
 const msalInstance = new msal.ConfidentialClientApplication(msalConfig);
@@ -65,8 +66,17 @@ async function redirectToAuthCodeUrl(req, res, next, authCodeUrlRequestParams, a
   }
 }
 
-router.get('/signin', async function (req, res, next) {
+router.get('/status', async function (req, res, next) {
+  const authenticated = isAuthenticated(req);
+  const authorized = isAuthorized(req, 'Login.Read');
 
+  return res.json({
+    'authenticated': authenticated,
+    'authorized': authorized
+  });
+});
+
+router.get('/signin', async function (req, res, next) {
   // create a GUID for crsf
   req.session.csrfToken = cryptoProvider.createNewGuid();
 
