@@ -46,8 +46,7 @@ async function startServer() {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      // TODO: Change this to true in prod
-      secure: false
+      secure: true
     }
   }));
 
