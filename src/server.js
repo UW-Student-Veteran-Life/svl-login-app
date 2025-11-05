@@ -3,12 +3,6 @@
  * @description This module is the startup script for the server and handles router setup,
  * secret retrieval, database connection, and auth configuration
  */
-const appInsights = require('applicationinsights');
-
-appInsights.setup()
-  .setAutoCollectConsole(true, true)
-  .start();
-
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const http = require('http');
