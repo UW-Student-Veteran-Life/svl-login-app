@@ -110,15 +110,14 @@ function recordsToCsv(records) {
   records.forEach(record => {
     const studentInfo = record.student;
     const createdAt = new Date(record.createdAt);
+    const loginReasons = record.loginReasons.join(';')
 
-    record.loginReasons.forEach(login => {
-      csv += `${studentInfo.name},` +
+    csv += `${studentInfo.name},` +
       `${studentInfo.uwNetId ?? ''},` +
       `${studentInfo.number},` +
-      `${login},` +
+      `${loginReasons},` +
       `${createdAt.toLocaleDateString()},` +
       `${createdAt.toLocaleTimeString()}\n`;
-    });
   });
 
   return csv;
