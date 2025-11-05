@@ -5,6 +5,7 @@
 const { addOption, getOptions, deleteOption } = require('../db/options');
 const { Option } = require('../core/Option');
 const express = require('express');
+const { isAuthenticated } = require('../utilities/auth');
 
 const router = express.Router();
 router.use(express.json());
@@ -22,6 +23,14 @@ router.get('/options', async (req, res) => {
 });
 
 router.post('/options', async (req, res) => {
+  if (!isAuthenticated(req)) {
+    return res.redirect('/auth/signin');
+  }
+
+  if (!isAuthorized(req, 'Login.Read')) {
+    return res.status(401).send('You do not have the valid permissions to view logins');
+  }
+
   const description = req.body.description;
 
   if (description === undefined) {
@@ -49,6 +58,14 @@ router.post('/options', async (req, res) => {
 });
 
 router.delete('/options/:optionId', async (req, res) => {
+  if (!isAuthenticated(req)) {
+    return res.redirect('/auth/signin');
+  }
+
+  if (!isAuthorized(req, 'Login.Read')) {
+    return res.status(401).send('You do not have the valid permissions to view logins');
+  }
+
   const optionId = req.params.optionId;
 
   try {
