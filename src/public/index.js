@@ -34,6 +34,26 @@ window.addEventListener('load', async () => {
     }, 4000);
   }
 
+  const loginStatus = await fetch('/auth/status');
+
+  if (loginStatus.ok) {
+    const content = await loginStatus.json();
+
+    const loginLink = document.getElementById('login-link');
+    const adminLink = document.getElementById('admin-link');
+
+    if (content.authenticated && content.authorized) {
+      loginLink.style.display = 'none';
+      adminLink.style.display = 'block';
+    } else if (content.authenticated) {
+      loginLink.style.display = 'none';
+      adminLink.style.display = 'none';
+    } else {
+      loginLink.style.display = 'block';
+      adminLink.style.display = 'none';
+    }
+  }
+
   qs('#login-form').addEventListener('submit', submitLoginEvent);
 });
 
