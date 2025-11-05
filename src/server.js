@@ -46,7 +46,8 @@ async function startServer() {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true
+      // This is false as the application will always run behind a proxied HTTP connection
+      secure: false
     }
   }));
 
