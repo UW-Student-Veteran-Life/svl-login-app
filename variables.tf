@@ -47,6 +47,10 @@ variable "global_resource_group_location" {
   default = "#{GLOBAL_RESOURCE_GROUP_LOCATION}"
 }
 
+variable "login_record_ttl" {
+  default = "#{LOGIN_RECORD_TTL}"
+}
+
 variable "resource_group_location" {
   default = "#{RESOURCE_GROUP_LOCATION}"
 }

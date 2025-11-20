@@ -126,7 +126,7 @@ resource "azurerm_cosmosdb_sql_container" "logins" {
   account_name        = azurerm_cosmosdb_account.cosmos.name
   database_name       = azurerm_cosmosdb_sql_database.database.name
   partition_key_paths = ["/id"]
-  default_ttl         = 86400
+  default_ttl         = var.login_record_ttl
 
   lifecycle {
     prevent_destroy = true
