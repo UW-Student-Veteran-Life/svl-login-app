@@ -49,11 +49,6 @@ resource "azurerm_key_vault" "vault" {
   enable_rbac_authorization = true
 }
 
-import {
-  id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/rg-svl-prd-westus2/providers/Microsoft.KeyVault/vaults/kv-svl-prd-westus2/providers/Microsoft.Authorization/roleAssignments/57330898-9bcc-48e1-b407-691a7cfc2be4"
-  to = azurerm_role_assignment.key_vault_admin
-}
-
 resource "azurerm_role_assignment" "key_vault_admin" {
   scope                = azurerm_key_vault.vault.id
   role_definition_name = "Key Vault Administrator"
