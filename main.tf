@@ -39,61 +39,55 @@ resource "azurerm_service_plan" "plan" {
   sku_name            = var.app_plan_sku
 }
 
-resource "azurerm_key_vault" "vault" {
-  name                      = "kv-svl-${var.env_name}-${azurerm_resource_group.group.location}"
-  resource_group_name       = azurerm_resource_group.group.name
-  location                  = azurerm_resource_group.group.location
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
+# resource "azurerm_key_vault" "vault" {
+#   name                      = "kv-svl-${var.env_name}-${azurerm_resource_group.group.location}"
+#   resource_group_name       = azurerm_resource_group.group.name
+#   location                  = azurerm_resource_group.group.location
+#   tenant_id                 = data.azurerm_client_config.current.tenant_id
 
-  sku_name                  = "standard"
-  enable_rbac_authorization = true
-}
+#   sku_name                  = "standard"
+#   enable_rbac_authorization = true
+# }
+# resource "azurerm_role_assignment" "key_vault_admin" {
+#   scope                 = azurerm_key_vault.vault.id
+#   role_definition_name  = "Key Vault Administrator"
+#   principal_id          = data.azurerm_client_config.current.object_id
+# }
 
-import {
-  id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/rg-svl-prd-westus2/providers/Microsoft.KeyVault/vaults/kv-svl-prd-westus2/providers/Microsoft.Authorization/roleAssignments/57330898-9bcc-48e1-b407-691a7cfc2be4"
-  to = azurerm_role_assignment.key_vault_admin
-}
+# resource "azurerm_key_vault_secret" "azure_client_id" {
+#   depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+#   name         = "APP-CLIENT-ID"
+#   key_vault_id = azurerm_key_vault.vault.id
+#   value        = var.app_client_id
+# }
 
-resource "azurerm_role_assignment" "key_vault_admin" {
-  scope                 = azurerm_key_vault.vault.id
-  role_definition_name  = "Key Vault Administrator"
-  principal_id          = data.azurerm_client_config.current.object_id
-}
+# resource "azurerm_key_vault_secret" "azure_client_secret" {
+#   depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+#   name         = "APP-CLIENT-SECRET"
+#   key_vault_id = azurerm_key_vault.vault.id
+#   value        = var.app_client_secret
+# }
 
-resource "azurerm_key_vault_secret" "azure_client_id" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
-  name         = "APP-CLIENT-ID"
-  key_vault_id = azurerm_key_vault.vault.id
-  value        = var.app_client_id
-}
+# resource "azurerm_key_vault_secret" "azure_tenant_id" {
+#   depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+#   name         = "AZURE-TENANT-ID"
+#   key_vault_id = azurerm_key_vault.vault.id
+#   value        = data.azurerm_client_config.current.tenant_id
+# }
 
-resource "azurerm_key_vault_secret" "azure_client_secret" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
-  name         = "APP-CLIENT-SECRET"
-  key_vault_id = azurerm_key_vault.vault.id
-  value        = var.app_client_secret
-}
+# resource "azurerm_key_vault_secret" "api_root" {
+#   depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+#   name         = "API-ROOT"
+#   key_vault_id = azurerm_key_vault.vault.id
+#   value        = var.api_root
+# }
 
-resource "azurerm_key_vault_secret" "azure_tenant_id" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
-  name         = "AZURE-TENANT-ID"
-  key_vault_id = azurerm_key_vault.vault.id
-  value        = data.azurerm_client_config.current.tenant_id
-}
-
-resource "azurerm_key_vault_secret" "api_root" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
-  name         = "API-ROOT"
-  key_vault_id = azurerm_key_vault.vault.id
-  value        = var.api_root
-}
-
-resource "azurerm_key_vault_secret" "app_session_secret" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
-  name         = "APP-SESSION-SECRET"
-  key_vault_id = azurerm_key_vault.vault.id
-  value        = var.app_session_secret
-}
+# resource "azurerm_key_vault_secret" "app_session_secret" {
+#   depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+#   name         = "APP-SESSION-SECRET"
+#   key_vault_id = azurerm_key_vault.vault.id
+#   value        = var.app_session_secret
+# }
 
 resource "azurerm_cosmosdb_account" "cosmos" {
   name                = "cosmos-svl-${var.env_name}-${azurerm_resource_group.group.location}"
@@ -115,12 +109,12 @@ resource "azurerm_cosmosdb_account" "cosmos" {
   }
 }
 
-resource "azurerm_key_vault_secret" "cosmos" {
-  depends_on = [ azurerm_role_assignment.key_vault_admin ]
-  key_vault_id  = azurerm_key_vault.vault.id
-  name          = "DB-CONN"
-  value         = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
-}
+# resource "azurerm_key_vault_secret" "cosmos" {
+#   depends_on = [ azurerm_role_assignment.key_vault_admin ]
+#   key_vault_id  = azurerm_key_vault.vault.id
+#   name          = "DB-CONN"
+#   value         = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
+# }
 
 resource "azurerm_cosmosdb_sql_database" "database" {
   name                = "SVL"
@@ -186,21 +180,21 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   app_settings = {
-    "API_ROOT": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API-ROOT)",
-    # "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.connection_string,
-    "MSAL_CLIENT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-ID)",
-    "MSAL_CLIENT_SECRET": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-SECRET)",
-    "MSAL_TENANT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE-TENANT-ID)",
+    # "API_ROOT": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API-ROOT)",
+    # # "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.connection_string,
+    # "MSAL_CLIENT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-ID)",
+    # "MSAL_CLIENT_SECRET": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-SECRET)",
+    # "MSAL_TENANT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE-TENANT-ID)",
     "CLOUD_INSTANCE": "https://login.microsoftonline.com/",
     "GRAPH_API_ENDPOINT": "https://graph.microsoft.com/",
     "POST_LOGOUT_REDIRECT_URI": var.app_post_logout_redirect,
     "REDIRECT_URI": var.app_redirect_uri
-    "VAULT_URI": azurerm_key_vault.vault.vault_uri
+    # "VAULT_URI": azurerm_key_vault.vault.vault_uri
   }
 }
 
-resource "azurerm_role_assignment" "app_secrets" {
-  scope                 = azurerm_key_vault.vault.id
-  role_definition_name  = "Key Vault Secrets Officer"
-  principal_id          = azurerm_linux_web_app.app.identity[0].principal_id
-}
+# resource "azurerm_role_assignment" "app_secrets" {
+#   scope                 = azurerm_key_vault.vault.id
+#   role_definition_name  = "Key Vault Secrets Officer"
+#   principal_id          = azurerm_linux_web_app.app.identity[0].principal_id
+# }
