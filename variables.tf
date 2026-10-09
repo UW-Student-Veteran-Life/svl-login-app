@@ -27,12 +27,12 @@ variable "app_session_secret" {
 }
 
 variable "api_root" {
-  default   = "#{API_ROOT}"
+  default = "#{API_ROOT}"
 }
 
 variable "app_client_secret" {
-  default     = "#{APP_CLIENT_SECRET}"
-  sensitive   = true
+  default   = "#{APP_CLIENT_SECRET}"
+  sensitive = true
 }
 
 variable "app_plan_sku" {

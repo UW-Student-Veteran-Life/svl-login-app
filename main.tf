@@ -1,16 +1,16 @@
 terraform {
-    required_version = "1.16.5"
+  required_version = "1.16.5"
 
-    backend "azurerm" {
-      resource_group_name   = "rg-svl-global-westus2"
-      storage_account_name  = "sttfsvlstateglobal"
-      container_name        = "tf-state"
-      key                   = "svl.#{ENV_NAME}.tfstate"
-    }
+  backend "azurerm" {
+    resource_group_name  = "rg-svl-global-westus2"
+    storage_account_name = "sttfsvlstateglobal"
+    container_name       = "tf-state"
+    key                  = "svl.#{ENV_NAME}.tfstate"
+  }
 
   required_providers {
     azurerm = {
-      source = "hashicorp/azurerm"
+      source  = "hashicorp/azurerm"
       version = "4.3.0"
     }
   }
@@ -27,8 +27,8 @@ provider "azurerm" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "group" {
-  name      = "rg-svl-${var.env_name}-${var.resource_group_location}"
-  location  = var.resource_group_location
+  name     = "rg-svl-${var.env_name}-${var.resource_group_location}"
+  location = var.resource_group_location
 }
 
 resource "azurerm_service_plan" "plan" {
@@ -40,10 +40,10 @@ resource "azurerm_service_plan" "plan" {
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                      = "kv-svl-${var.env_name}-${azurerm_resource_group.group.location}"
-  resource_group_name       = azurerm_resource_group.group.name
-  location                  = azurerm_resource_group.group.location
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
+  name                = "kv-svl-${var.env_name}-${azurerm_resource_group.group.location}"
+  resource_group_name = azurerm_resource_group.group.name
+  location            = azurerm_resource_group.group.location
+  tenant_id           = data.azurerm_client_config.current.tenant_id
 
   sku_name                  = "standard"
   enable_rbac_authorization = true
@@ -55,41 +55,41 @@ import {
 }
 
 resource "azurerm_role_assignment" "key_vault_admin" {
-  scope                 = azurerm_key_vault.vault.id
-  role_definition_name  = "Key Vault Administrator"
-  principal_id          = data.azurerm_client_config.current.object_id
+  scope                = azurerm_key_vault.vault.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_key_vault_secret" "azure_client_id" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+  depends_on   = [azurerm_role_assignment.key_vault_admin]
   name         = "APP-CLIENT-ID"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_client_id
 }
 
 resource "azurerm_key_vault_secret" "azure_client_secret" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+  depends_on   = [azurerm_role_assignment.key_vault_admin]
   name         = "APP-CLIENT-SECRET"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_client_secret
 }
 
 resource "azurerm_key_vault_secret" "azure_tenant_id" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+  depends_on   = [azurerm_role_assignment.key_vault_admin]
   name         = "AZURE-TENANT-ID"
   key_vault_id = azurerm_key_vault.vault.id
   value        = data.azurerm_client_config.current.tenant_id
 }
 
 resource "azurerm_key_vault_secret" "api_root" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+  depends_on   = [azurerm_role_assignment.key_vault_admin]
   name         = "API-ROOT"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.api_root
 }
 
 resource "azurerm_key_vault_secret" "app_session_secret" {
-  depends_on   = [ azurerm_role_assignment.key_vault_admin ]
+  depends_on   = [azurerm_role_assignment.key_vault_admin]
   name         = "APP-SESSION-SECRET"
   key_vault_id = azurerm_key_vault.vault.id
   value        = var.app_session_secret
@@ -116,10 +116,10 @@ resource "azurerm_cosmosdb_account" "cosmos" {
 }
 
 resource "azurerm_key_vault_secret" "cosmos" {
-  depends_on = [ azurerm_role_assignment.key_vault_admin ]
-  key_vault_id  = azurerm_key_vault.vault.id
-  name          = "DB-CONN"
-  value         = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
+  depends_on   = [azurerm_role_assignment.key_vault_admin]
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "DB-CONN"
+  value        = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
 }
 
 resource "azurerm_cosmosdb_sql_database" "database" {
@@ -157,12 +157,19 @@ resource "azurerm_cosmosdb_sql_container" "options" {
   }
 }
 
-# resource "azurerm_application_insights" "logs" {
-#   name                = "appi-svl-${var.env_name}-${azurerm_resource_group.group.location}"
-#   location            = azurerm_resource_group.group.location
-#   resource_group_name = azurerm_resource_group.group.name
-#   application_type    = "Node.JS"
-# }
+resource "azurerm_log_analytics_workspace" "logs" {
+  name                = "law-svl-${var.env_name}-${azurerm_resource_group.group.location}"
+  location            = azurerm_resource_group.group.location
+  resource_group_name = azurerm_resource_group.group.name
+}
+
+resource "azurerm_application_insights" "logs" {
+  name                = "appi-svl-${var.env_name}-${azurerm_resource_group.group.location}"
+  location            = azurerm_resource_group.group.location
+  resource_group_name = azurerm_resource_group.group.name
+  application_type    = "Node.JS"
+  workspace_id        = azurerm_log_analytics_workspace.logs.id
+}
 
 resource "azurerm_linux_web_app" "app" {
   name                = "app-svl-${var.env_name}-${azurerm_resource_group.group.location}"
@@ -186,21 +193,21 @@ resource "azurerm_linux_web_app" "app" {
   }
 
   app_settings = {
-    "API_ROOT": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API-ROOT)",
-    # "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.connection_string,
-    "MSAL_CLIENT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-ID)",
-    "MSAL_CLIENT_SECRET": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-SECRET)",
-    "MSAL_TENANT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE-TENANT-ID)",
-    "CLOUD_INSTANCE": "https://login.microsoftonline.com/",
-    "GRAPH_API_ENDPOINT": "https://graph.microsoft.com/",
-    "POST_LOGOUT_REDIRECT_URI": var.app_post_logout_redirect,
-    "REDIRECT_URI": var.app_redirect_uri
-    "VAULT_URI": azurerm_key_vault.vault.vault_uri
+    "API_ROOT" : "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API-ROOT)",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.connection_string,
+    "MSAL_CLIENT_ID" : "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-ID)",
+    "MSAL_CLIENT_SECRET" : "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-SECRET)",
+    "MSAL_TENANT_ID" : "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE-TENANT-ID)",
+    "CLOUD_INSTANCE" : "https://login.microsoftonline.com/",
+    "GRAPH_API_ENDPOINT" : "https://graph.microsoft.com/",
+    "POST_LOGOUT_REDIRECT_URI" : var.app_post_logout_redirect,
+    "REDIRECT_URI" : var.app_redirect_uri
+    "VAULT_URI" : azurerm_key_vault.vault.vault_uri
   }
 }
 
 resource "azurerm_role_assignment" "app_secrets" {
-  scope                 = azurerm_key_vault.vault.id
-  role_definition_name  = "Key Vault Secrets Officer"
-  principal_id          = azurerm_linux_web_app.app.identity[0].principal_id
+  scope                = azurerm_key_vault.vault.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = azurerm_linux_web_app.app.identity[0].principal_id
 }
