@@ -152,12 +152,12 @@ resource "azurerm_cosmosdb_sql_container" "options" {
   }
 }
 
-resource "azurerm_application_insights" "logs" {
-  name                = "appi-svl-${var.env_name}-${azurerm_resource_group.group.location}"
-  location            = azurerm_resource_group.group.location
-  resource_group_name = azurerm_resource_group.group.name
-  application_type    = "Node.JS"
-}
+# resource "azurerm_application_insights" "logs" {
+#   name                = "appi-svl-${var.env_name}-${azurerm_resource_group.group.location}"
+#   location            = azurerm_resource_group.group.location
+#   resource_group_name = azurerm_resource_group.group.name
+#   application_type    = "Node.JS"
+# }
 
 resource "azurerm_linux_web_app" "app" {
   name                = "app-svl-${var.env_name}-${azurerm_resource_group.group.location}"
@@ -182,7 +182,7 @@ resource "azurerm_linux_web_app" "app" {
 
   app_settings = {
     "API_ROOT": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=API-ROOT)",
-    "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.connection_string,
+    # "APPLICATIONINSIGHTS_CONNECTION_STRING": azurerm_application_insights.logs.connection_string,
     "MSAL_CLIENT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-ID)",
     "MSAL_CLIENT_SECRET": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=APP-CLIENT-SECRET)",
     "MSAL_TENANT_ID": "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.vault.name};SecretName=AZURE-TENANT-ID)",
