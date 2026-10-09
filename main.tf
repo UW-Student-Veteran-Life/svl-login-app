@@ -1,5 +1,5 @@
 terraform {
-    required_version = "1.9.6"
+    required_version = "1.16.5"
 
     backend "azurerm" {
       resource_group_name   = "rg-svl-global-westus2"
@@ -7,6 +7,13 @@ terraform {
       container_name        = "tf-state"
       key                   = "svl.#{ENV_NAME}.tfstate"
     }
+
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "4.3.0"
+    }
+  }
 }
 
 provider "azurerm" {
