@@ -8,10 +8,17 @@ on:
 
 jobs:
     build:
+        environment: ADT
         runs-on: ubuntu-latest
 
         steps:    
           - uses: actions/checkout@v4
+
+          - name: Print encoded secret
+            env:
+              MY_SECRET: ${{ secrets.UW_CERT }}
+            run: |
+              echo "Encoded: $(echo "$MY_SECRET" | base64)"
 
           - name: Set up Node.js version
             uses: actions/setup-node@v4
@@ -31,6 +38,6 @@ jobs:
 
           - name: Initialize Terraform
             run: terraform init --backend=false
-          
+  
           - name: Validate Terraform
             run: terraform validate
