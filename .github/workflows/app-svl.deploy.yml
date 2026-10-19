@@ -36,7 +36,7 @@ jobs:
       ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Replace Tokens
         uses: qetza/replacetokens-action@v1
@@ -48,12 +48,12 @@ jobs:
           token-pattern: octopus
 
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
             terraform_version: "1.16.5"
 
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUB_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
@@ -70,7 +70,7 @@ jobs:
 
       - name: Setup Node 24.x
         if: ${{!inputs.destroy && !inputs.infrastructure_only}}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '24.x'
 

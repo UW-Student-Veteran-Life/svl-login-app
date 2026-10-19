@@ -12,16 +12,10 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:    
-          - uses: actions/checkout@v4
-
-          - name: Print encoded secret
-            env:
-              MY_SECRET: ${{ secrets.UW_CERT }}
-            run: |
-              echo "Encoded: $(echo "$MY_SECRET" | base64)"
+          - uses: actions/checkout@v7
 
           - name: Set up Node.js version
-            uses: actions/setup-node@v4
+            uses: actions/setup-node@v7
             with:
               node-version: '24.x'
     
@@ -32,7 +26,7 @@ jobs:
               npm --prefix src run test --if-present
 
           - name: Install Terraform
-            uses: hashicorp/setup-terraform@v3
+            uses: hashicorp/setup-terraform@v4
             with:
                 terraform_version: "1.16.5"
 
