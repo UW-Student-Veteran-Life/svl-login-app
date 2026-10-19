@@ -27,8 +27,8 @@ provider "azurerm" {
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "group" {
-  name     = "rg-svl-${var.env_name}-${var.resource_group_location}"
-  location = var.resource_group_location
+  name     = "rg-svl-${var.env_name}-westus2"
+  location = "westus2"
 }
 
 resource "azurerm_service_plan" "plan" {
@@ -36,7 +36,7 @@ resource "azurerm_service_plan" "plan" {
   resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
   os_type             = "Linux"
-  sku_name            = var.app_plan_sku
+  sku_name            = "B1"
 }
 
 resource "azurerm_key_vault" "vault" {

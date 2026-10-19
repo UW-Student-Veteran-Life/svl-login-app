@@ -27,17 +27,8 @@ variable "app_client_secret" {
   sensitive = true
 }
 
-variable "app_plan_sku" {
-}
-
 variable "env_name" {
 }
 
-variable "global_resource_group_location" {
-}
-
 variable "login_record_ttl" {
-}
-
-variable "resource_group_location" {
 }
