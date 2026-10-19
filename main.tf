@@ -11,7 +11,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "4.3.0"
+      version = "5.10.0"
     }
   }
 }
@@ -45,8 +45,8 @@ resource "azurerm_key_vault" "vault" {
   location            = azurerm_resource_group.group.location
   tenant_id           = data.azurerm_client_config.current.tenant_id
 
-  sku_name                  = "standard"
-  enable_rbac_authorization = true
+  sku_name                   = "standard"
+  rbac_authorization_enabled = true
 }
 
 resource "azurerm_role_assignment" "key_vault_admin" {
