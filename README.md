@@ -80,9 +80,9 @@ Store the resulting value in Azure Key Vault as a secret named `svlcardreader-ve
 
 ## Azure deployment
 
-The root Terraform configuration provisions the Azure resources, including the resource group, Linux App Service plan and web app, Key Vault, Cosmos DB account/database/containers, and Application Insights. The App Service uses Node.js 24 LTS. Infrastructure is deployed by the GitHub Actions **Deploy** workflow, which can be started manually with the `ADT`, `QAT`, or `PRD` environment selected. The workflow also supports an infrastructure-only deployment. Destruction is disabled for `PRD`.
+The root Terraform configuration provisions the Azure resources, including the resource group, Linux App Service plan and web app, Key Vault, Cosmos DB account/database/containers, and Application Insights. The App Service uses Node.js 24 LTS. Infrastructure is deployed by the GitHub Actions **Deploy** workflow, which can be started manually with the `ADT`, `QAT`, or `PRD` environment selected. Each run creates a Terraform plan first. Apply and destroy runs then wait for approval through the selected GitHub Environment before applying the saved plan. Enable required reviewers on each deployment environment to enforce this approval gate. The `Plan Only` option publishes the plan as a one-day workflow artifact and skips apply/destroy; starting a later deployment creates a fresh plan. The workflow also supports an infrastructure-only deployment. Destruction is disabled for `PRD`.
 
-Configure these GitHub environment variables and secrets before deploying. The workflow passes Terraform inputs using matching `TF_VAR_*` environment variables, without modifying the Terraform files:
+Create an unprotected GitHub Environment named `<ENV>-PLAN` for each environment (`ADT-PLAN`, `QAT-PLAN`, and `PRD-PLAN`). Copy the corresponding deployment environment's variables and secrets into it so Terraform can create the plan without waiting for deployment approval. Keep required reviewers on the `ADT`, `QAT`, and `PRD` deployment environments; approval is requested only after the plan is ready. Configure these GitHub environment variables and secrets in both each deployment environment and its corresponding plan environment. The workflow passes Terraform inputs using matching `TF_VAR_*` environment variables, without modifying the Terraform files:
 
 | Terraform variable | GitHub environment value |
 |---|---|
@@ -100,7 +100,7 @@ Configure these GitHub environment variables and secrets before deploying. The w
 | `login_record_ttl` | Variable `LOGIN_RECORD_TTL` |
 | `resource_group_location` | Variable `RESOURCE_GROUP_LOCATION` |
 
-The workflow also needs Azure deployment credentials (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `AZURE_SUB_ID`, and `AZURE_TENANT_ID`). The Terraform state key is selected from `ENV_NAME` during initialization. Keep secret values in GitHub Environments/Secrets or Key Vault, not in the repository.
+The workflow also needs Azure deployment credentials (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `AZURE_SUB_ID`, and `AZURE_TENANT_ID`). The Terraform state key is selected from `ENV_NAME` during initialization. Keep secret values in GitHub Environments/Secrets or Key Vault, not in the repository. Terraform plan artifacts can contain sensitive infrastructure values; restrict repository and workflow-run access accordingly.
 
 The GitHub Actions **Build and Validate** workflow installs Node.js 24 dependencies and validates Terraform. The application package is in `src/`.
 

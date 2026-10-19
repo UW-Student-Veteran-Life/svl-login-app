@@ -19,16 +19,20 @@ on:
         description: Destroy
         type: boolean
         default: false
+      plan_only:
+        description: Plan Only
+        type: boolean
+        default: false
       infrastructure_only:
         description: Infrastructure Only
         type: boolean
         default: false
 
 jobs:
-  deploy:
+  plan:
     runs-on: ubuntu-latest
-    name: Deploy
-    environment: ${{inputs.environment}}
+    name: Plan
+    environment: ${{inputs.environment}}-PLAN
     env:
       ARM_CLIENT_ID: ${{secrets.ARM_CLIENT_ID}}
       ARM_CLIENT_SECRET: ${{secrets.ARM_CLIENT_SECRET}}
@@ -64,13 +68,76 @@ jobs:
       - name: Initialize Terraform
         run: terraform init -backend-config="key=svl.${{vars.ENV_NAME}}.tfstate"
 
-      - name: Terraform Apply
-        if: ${{!inputs.destroy}}
-        run: terraform apply -auto-approve
+      - name: Reject PRD destroy
+        if: ${{inputs.destroy && inputs.environment == 'PRD'}}
+        run: |
+          echo "Destroy is disabled for PRD."
+          exit 1
 
-      - name: Terraform Destroy
-        if: ${{inputs.destroy && !(inputs.environment == 'PRD')}}
-        run: terraform destroy -auto-approve
+      - name: Plan Terraform apply
+        if: ${{!inputs.destroy}}
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Plan Terraform destroy
+        if: ${{inputs.destroy && inputs.environment != 'PRD'}}
+        run: terraform plan -destroy -input=false -out=tfplan
+
+      - name: Upload Terraform plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: tfplan
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy:
+    needs: plan
+    if: ${{!inputs.plan_only}}
+    runs-on: ubuntu-latest
+    name: Deploy
+    environment: ${{inputs.environment}}
+    env:
+      ARM_CLIENT_ID: ${{secrets.ARM_CLIENT_ID}}
+      ARM_CLIENT_SECRET: ${{secrets.ARM_CLIENT_SECRET}}
+      ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SUB_ID}}
+      ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
+      TF_VAR_arm_client_id: ${{secrets.ARM_CLIENT_ID}}
+      TF_VAR_arm_client_secret: ${{secrets.ARM_CLIENT_SECRET}}
+      TF_VAR_app_client_id: ${{secrets.APP_CLIENT_ID}}
+      TF_VAR_app_post_logout_redirect: ${{vars.POST_LOGOUT_REDIRECT_URI}}
+      TF_VAR_app_redirect_uri: ${{vars.REDIRECT_URI}}
+      TF_VAR_app_session_secret: ${{secrets.APP_SESSION_SECRET}}
+      TF_VAR_api_root: ${{vars.API_ROOT}}
+      TF_VAR_app_client_secret: ${{secrets.APP_CLIENT_SECRET}}
+      TF_VAR_app_plan_sku: ${{vars.APP_PLAN_SKU}}
+      TF_VAR_env_name: ${{vars.ENV_NAME}}
+      TF_VAR_global_resource_group_location: ${{vars.GLOBAL_RESOURCE_GROUP_LOCATION}}
+      TF_VAR_login_record_ttl: ${{vars.LOGIN_RECORD_TTL}}
+      TF_VAR_resource_group_location: ${{vars.RESOURCE_GROUP_LOCATION}}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.16.5"
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUB_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
+
+      - name: Initialize Terraform
+        run: terraform init -backend-config="key=svl.${{vars.ENV_NAME}}.tfstate"
+
+      - name: Download Terraform plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+
+      - name: Apply Terraform plan
+        run: terraform apply -input=false tfplan
 
       - name: Setup Node 24.x
         if: ${{!inputs.destroy && !inputs.infrastructure_only}}
