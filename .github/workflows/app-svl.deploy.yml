@@ -47,11 +47,16 @@ jobs:
       TF_VAR_app_session_secret: ${{secrets.APP_SESSION_SECRET}}
       TF_VAR_api_root: ${{vars.API_ROOT}}
       TF_VAR_app_client_secret: ${{secrets.APP_CLIENT_SECRET}}
-      TF_VAR_env_name: ${{vars.ENV_NAME}}
       TF_VAR_login_record_ttl: ${{vars.LOGIN_RECORD_TTL}}
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Normalize environment name
+        id: environment
+        run: echo "name=${INPUT_ENVIRONMENT,,}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_ENVIRONMENT: ${{inputs.environment}}
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v4
@@ -64,10 +69,12 @@ jobs:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUB_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
       - name: Initialize Terraform
-        run: terraform init -backend-config="key=svl.${{vars.ENV_NAME}}.tfstate"
+        run: terraform init -backend-config="key=svl.${{steps.environment.outputs.name}}.tfstate"
 
       - name: Plan Terraform
         run: terraform plan -input=false -out=tfplan
+        env:
+          TF_VAR_env_name: ${{steps.environment.outputs.name}}
 
       - name: Upload Terraform plan
         uses: actions/upload-artifact@v4
@@ -95,11 +102,16 @@ jobs:
       TF_VAR_app_session_secret: ${{secrets.APP_SESSION_SECRET}}
       TF_VAR_api_root: ${{vars.API_ROOT}}
       TF_VAR_app_client_secret: ${{secrets.APP_CLIENT_SECRET}}
-      TF_VAR_env_name: ${{vars.ENV_NAME}}
       TF_VAR_login_record_ttl: ${{vars.LOGIN_RECORD_TTL}}
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Normalize environment name
+        id: environment
+        run: echo "name=${INPUT_ENVIRONMENT,,}" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_ENVIRONMENT: ${{inputs.environment}}
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v4
@@ -112,7 +124,7 @@ jobs:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUB_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
       - name: Initialize Terraform
-        run: terraform init -backend-config="key=svl.${{vars.ENV_NAME}}.tfstate"
+        run: terraform init -backend-config="key=svl.${{steps.environment.outputs.name}}.tfstate"
 
       - name: Reject PRD destroy
         if: ${{inputs.operation == 'destroy' && inputs.environment == 'PRD'}}
@@ -123,10 +135,14 @@ jobs:
       - name: Terraform Apply
         if: ${{inputs.operation == 'apply'}}
         run: terraform apply -auto-approve
+        env:
+          TF_VAR_env_name: ${{steps.environment.outputs.name}}
 
       - name: Terraform Destroy
         if: ${{inputs.operation == 'destroy' && inputs.environment != 'PRD'}}
         run: terraform destroy -auto-approve
+        env:
+          TF_VAR_env_name: ${{steps.environment.outputs.name}}
 
       - name: Setup Node 24.x
         if: ${{inputs.operation == 'apply' && !inputs.infrastructure_only}}
@@ -144,5 +160,5 @@ jobs:
         if: ${{inputs.operation == 'apply' && !inputs.infrastructure_only}}
         uses: azure/webapps-deploy@v3
         with:
-          app-name: app-svl-${{vars.ENV_NAME}}-westus2
+          app-name: app-svl-${{steps.environment.outputs.name}}-westus2
           package: src

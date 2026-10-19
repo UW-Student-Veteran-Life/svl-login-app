@@ -104,10 +104,10 @@ Configure these GitHub environment variables and secrets in each deployment envi
 | `app_session_secret` | Secret `APP_SESSION_SECRET` |
 | `api_root` | Variable `API_ROOT` |
 | `app_client_secret` | Secret `APP_CLIENT_SECRET` |
-| `env_name` | Variable `ENV_NAME` |
+| `env_name` | Lowercase version of the workflow's selected environment (`ADT`, `QAT`, or `PRD`) |
 | `login_record_ttl` | Variable `LOGIN_RECORD_TTL` |
 
-The Terraform configuration sets the resource location to `westus2` and the App Service plan SKU to `B1`. The workflow also needs Azure deployment credentials (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `AZURE_SUB_ID`, and `AZURE_TENANT_ID`). The Terraform state key is selected from `ENV_NAME` during initialization. Keep secret values in GitHub Environments/Secrets or Key Vault, not in the repository. Terraform plan artifacts can contain sensitive infrastructure values; restrict repository and workflow-run access accordingly.
+The Terraform configuration sets the resource location to `westus2` and the App Service plan SKU to `B1`. The workflow derives `env_name`, the Terraform state key, and the Web App name from the selected workflow environment, converting it to lowercase. The workflow also needs Azure deployment credentials (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `AZURE_SUB_ID`, and `AZURE_TENANT_ID`). Keep secret values in GitHub Environments/Secrets or Key Vault, not in the repository. Terraform plan artifacts can contain sensitive infrastructure values; restrict repository and workflow-run access accordingly.
 
 The GitHub Actions **Build and Validate** workflow installs Node.js 24 dependencies and validates Terraform. The application package is in `src/`.
 
