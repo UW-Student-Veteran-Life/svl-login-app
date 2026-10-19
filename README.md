@@ -18,10 +18,9 @@ or possible login options. It is not necessary that you use the specific `Cosmos
 offering, the `CosmosDB for MongoDB` offering may work but it could potentially require 
 alterations on the backend.
 
-## Web App running NodeJS
-A web app running NodeJS is needed to use this application. It is highly recommended to use
-the latest long-term support version of NodeJS offered by Azure as this application does not
-have any requirements to be ran on an older NodeJS runtime.
+## Web App running Node.js
+A web app running Node.js 24 LTS is needed to use this application. The application and its
+deployment workflows target Node.js 24.
 
 # Application Dependencies
 The main dependencies of this application are the following services provided by UW IT:

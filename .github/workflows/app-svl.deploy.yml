@@ -68,11 +68,11 @@ jobs:
         if: ${{inputs.destroy && !(inputs.environment == 'PRD')}}
         run: terraform destroy -auto-approve
 
-      - name: Setup Node 20.x
+      - name: Setup Node 24.x
         if: ${{!inputs.destroy && !inputs.infrastructure_only}}
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '24.x'
 
       - name: Install NPM Dependencies
         if: ${{!inputs.destroy && !inputs.infrastructure_only}}
