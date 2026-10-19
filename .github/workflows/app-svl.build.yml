@@ -8,7 +8,6 @@ on:
 
 jobs:
     build:
-        environment: ADT
         runs-on: ubuntu-latest
 
         steps:    
