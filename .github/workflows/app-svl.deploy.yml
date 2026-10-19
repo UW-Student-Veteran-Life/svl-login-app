@@ -34,18 +34,22 @@ jobs:
       ARM_CLIENT_SECRET: ${{secrets.ARM_CLIENT_SECRET}}
       ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SUB_ID}}
       ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
+      TF_VAR_arm_client_id: ${{secrets.ARM_CLIENT_ID}}
+      TF_VAR_arm_client_secret: ${{secrets.ARM_CLIENT_SECRET}}
+      TF_VAR_app_client_id: ${{secrets.APP_CLIENT_ID}}
+      TF_VAR_app_post_logout_redirect: ${{vars.POST_LOGOUT_REDIRECT_URI}}
+      TF_VAR_app_redirect_uri: ${{vars.REDIRECT_URI}}
+      TF_VAR_app_session_secret: ${{secrets.APP_SESSION_SECRET}}
+      TF_VAR_api_root: ${{vars.API_ROOT}}
+      TF_VAR_app_client_secret: ${{secrets.APP_CLIENT_SECRET}}
+      TF_VAR_app_plan_sku: ${{vars.APP_PLAN_SKU}}
+      TF_VAR_env_name: ${{vars.ENV_NAME}}
+      TF_VAR_global_resource_group_location: ${{vars.GLOBAL_RESOURCE_GROUP_LOCATION}}
+      TF_VAR_login_record_ttl: ${{vars.LOGIN_RECORD_TTL}}
+      TF_VAR_resource_group_location: ${{vars.RESOURCE_GROUP_LOCATION}}
 
     steps:
       - uses: actions/checkout@v7
-
-      - name: Replace Tokens
-        uses: qetza/replacetokens-action@v1
-        with:
-          sources: "*.tf"
-          variables: '[${{ toJSON(vars) }}, ${{ toJSON(secrets) }}]'
-          if-no-files-found: error
-          missing-var-log: error
-          token-pattern: octopus
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v4
@@ -58,7 +62,7 @@ jobs:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUB_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
       - name: Initialize Terraform
-        run: terraform init
+        run: terraform init -backend-config="key=svl.${{vars.ENV_NAME}}.tfstate"
 
       - name: Terraform Apply
         if: ${{!inputs.destroy}}

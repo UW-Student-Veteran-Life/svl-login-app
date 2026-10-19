@@ -82,7 +82,25 @@ Store the resulting value in Azure Key Vault as a secret named `svlcardreader-ve
 
 The root Terraform configuration provisions the Azure resources, including the resource group, Linux App Service plan and web app, Key Vault, Cosmos DB account/database/containers, and Application Insights. The App Service uses Node.js 24 LTS. Infrastructure is deployed by the GitHub Actions **Deploy** workflow, which can be started manually with the `ADT`, `QAT`, or `PRD` environment selected. The workflow also supports an infrastructure-only deployment. Destruction is disabled for `PRD`.
 
-Configure the workflow's GitHub environment variables and secrets before deploying. The Terraform configuration uses token-replaced values for environment name, resource group location, App Service plan SKU, login-record TTL, API root, app registration settings, session secret, and redirect URIs. The workflow also needs Azure deployment credentials (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `AZURE_SUB_ID`, and `AZURE_TENANT_ID`). Keep secret values in GitHub Environments/Secrets or Key Vault, not in the repository.
+Configure these GitHub environment variables and secrets before deploying. The workflow passes Terraform inputs using matching `TF_VAR_*` environment variables, without modifying the Terraform files:
+
+| Terraform variable | GitHub environment value |
+|---|---|
+| `arm_client_id` | Secret `ARM_CLIENT_ID` |
+| `arm_client_secret` | Secret `ARM_CLIENT_SECRET` |
+| `app_client_id` | Secret `APP_CLIENT_ID` |
+| `app_post_logout_redirect` | Variable `POST_LOGOUT_REDIRECT_URI` |
+| `app_redirect_uri` | Variable `REDIRECT_URI` |
+| `app_session_secret` | Secret `APP_SESSION_SECRET` |
+| `api_root` | Variable `API_ROOT` |
+| `app_client_secret` | Secret `APP_CLIENT_SECRET` |
+| `app_plan_sku` | Variable `APP_PLAN_SKU` |
+| `env_name` | Variable `ENV_NAME` |
+| `global_resource_group_location` | Variable `GLOBAL_RESOURCE_GROUP_LOCATION` |
+| `login_record_ttl` | Variable `LOGIN_RECORD_TTL` |
+| `resource_group_location` | Variable `RESOURCE_GROUP_LOCATION` |
+
+The workflow also needs Azure deployment credentials (`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `AZURE_SUB_ID`, and `AZURE_TENANT_ID`). The Terraform state key is selected from `ENV_NAME` during initialization. Keep secret values in GitHub Environments/Secrets or Key Vault, not in the repository.
 
 The GitHub Actions **Build and Validate** workflow installs Node.js 24 dependencies and validates Terraform. The application package is in `src/`.
 
