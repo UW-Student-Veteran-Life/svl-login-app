@@ -23,7 +23,7 @@ jobs:
             run: |
               npm --prefix src install
               npm --prefix src run build --if-present
-              npm --prefix src run test --if-present
+              npm --prefix src test
 
           - name: Install Terraform
             uses: hashicorp/setup-terraform@v4

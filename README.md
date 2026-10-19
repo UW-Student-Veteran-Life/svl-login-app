@@ -29,6 +29,16 @@ npm start
 
 The server listens on port `8080` by default; set `PORT` to override it. Before starting the server, configure the environment variables below. Set these in your shell or local development environment; never commit credentials.
 
+### Run tests
+
+From the `src/` directory, run the automated tests with:
+
+```sh
+npm test
+```
+
+The tests use Node.js's built-in test runner and do not require access to Azure services.
+
 | Variable | Purpose |
 |---|---|
 | `VAULT_URI` | URI of the Azure Key Vault used by the app |
