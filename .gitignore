@@ -3,7 +3,6 @@ certs
 node_modules
 
 .terraform
-.terraform.lock.hcl
 
 *.pem
 *.pkcs7
