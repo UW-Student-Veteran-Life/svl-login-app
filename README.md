@@ -115,6 +115,8 @@ To rotate the certificate, update the Key Vault secret with the replacement PEM 
 
 The root Terraform configuration provisions the Azure resources, including the resource group, Linux App Service plan and web app, Key Vault, Cosmos DB account/database/containers, and Application Insights. The App Service uses Node.js 24 LTS. The GitHub Actions **Deploy** workflow can be started manually with the `ADT`, `QAT`, or `PRD` environment selected and performs exactly one operation per run: **Plan**, **Apply**, or **Destroy**. A Plan run publishes a one-day Terraform plan artifact and does not change infrastructure. Apply and Destroy runs execute Terraform directly and are gated by approval through the selected GitHub Environment; configure required reviewers on each environment to enforce this approval gate. Apply and Destroy generate a fresh Terraform plan when they run; a plan artifact from a separate Plan run is for inspection only and is not applied. The workflow also supports an infrastructure-only Apply. Destruction is disabled for `PRD`.
 
+[Read the CI/CD guide](docs/ci-cd.md) for workflow triggers and steps, deployment inputs, GitHub Environment configuration, Terraform state, operational checklists, and failure handling.
+
 Configure these GitHub environment variables and secrets in each deployment environment. Plan runs use the selected environment too, so its required reviewers approve access before Terraform creates the plan. The workflow passes Terraform inputs using matching `TF_VAR_*` environment variables, without modifying the Terraform files:
 
 | Terraform variable | GitHub environment value |
