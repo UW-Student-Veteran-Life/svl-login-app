@@ -21,13 +21,25 @@ This repository contains a kiosk-style web application for recording Student Vet
 
 From the repository root:
 
-```sh
-cd src
+```powershell
+az login
+$env:VAULT_URI = "https://<your-key-vault-name>.vault.azure.net/"
+$env:PORT = "8080"
+$env:CLOUD_INSTANCE = "https://login.microsoftonline.com/"
+$env:MSAL_TENANT_ID = "<Entra-tenant-id>"
+$env:MSAL_CLIENT_ID = "<Entra-app-client-id>"
+$env:MSAL_CLIENT_SECRET = "<Entra-app-client-secret>"
+$env:REDIRECT_URI = "http://localhost:8080/auth/redirect"
+$env:POST_LOGOUT_REDIRECT_URI = "http://localhost:8080/"
+$env:GRAPH_API_ENDPOINT = "https://graph.microsoft.com/"
+$env:API_ROOT = (az keyvault secret show --vault-name "<your-key-vault-name>" --name "API-ROOT" --query value --output tsv)
+
+Set-Location .\src
 npm install
 npm start
 ```
 
-The server listens on port `8080` by default; set `PORT` to override it. Before starting the server, configure the environment variables below. Set these in your shell or local development environment; never commit credentials.
+Register `http://localhost:8080/auth/redirect` as a Web redirect URI for the Entra app. Replace the placeholders with values for your development environment; do not use production credentials or a production database for local testing. The local Azure CLI identity needs permission to read the required Key Vault secrets. The app also connects to Cosmos DB using the `DB-CONN` secret, so local requests that read or write application data require access to that database. Set values in your shell or local development environment; never commit credentials.
 
 ### Run tests
 
@@ -56,7 +68,7 @@ The app also reads these Key Vault secrets at runtime:
 
 - `APP-SESSION-SECRET` — Express session signing secret
 - `DB-CONN` — Cosmos DB SQL API connection string
-- `svlcardreader-vetlife-washington-edu` — base64-encoded PFX client certificate for UW API requests
+- `svlcardreader-vetlife-washington-edu` — PEM text containing the client private key and matching certificate for UW API requests
 
 The local identity needs permission to read these secrets. The Terraform deployment assigns the web app's managed identity a Key Vault role; local identities must be granted access separately.
 
@@ -70,7 +82,7 @@ The local identity needs permission to read these secrets. The Terraform deploym
 
 ## UW ID Card Reader and Person Search APIs
 
-Both UW services use certificate-based client authentication. The app uses the same PFX certificate for both:
+Both UW services use certificate-based client authentication. The app uses the same PEM private key and certificate for both:
 
 - The ID Card Reader endpoint `/idcard/v1/card.json` resolves magnetic-stripe and prox/RFID card codes to a registration ID.
 - The Person Search endpoint `student/v5/person.json` retrieves student details by registration ID, UW NetID, or student number.
@@ -80,13 +92,24 @@ Access to these APIs and certificates is managed by UW IT. Request an appropriat
 
 ### Add or update the API certificate
 
-The runtime expects the **PFX file itself encoded as base64**, not a PEM certificate/key pair. Obtain a PFX containing the certificate and its private key from UW's certificate authority. In PowerShell, encode the file without changing its contents:
+The Key Vault secret named `svlcardreader-vetlife-washington-edu` must be a **string containing PEM text** with both the client private key and its matching certificate. The secret value should have PEM blocks in this general form (the bracketed text is illustrative, not literal):
 
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("path\to\issued-certificate.pfx"))
+```text
+-----BEGIN PRIVATE KEY-----
+<base64-encoded private key data>
+-----END PRIVATE KEY-----
+-----BEGIN CERTIFICATE-----
+<base64-encoded certificate data>
+-----END CERTIFICATE-----
 ```
 
-Store the resulting value in Azure Key Vault as a secret named `svlcardreader-vetlife-washington-edu`. Do not put the certificate, private key, or encoded value in source control, build logs, or unprotected files. The application decodes the secret and supplies the PFX to its HTTPS client.
+The private key must match the certificate. If the certificate authority supplies intermediate certificates, include the required certificate chain in PEM form after the client certificate. Do not convert this value to a PFX or base64-encode the entire PEM text: the application expects the PEM text as-is.
+
+When `cert.js` loads, it creates a Key Vault `SecretClient` using `VAULT_URI` and Azure's `DefaultAzureCredential` chain. In Azure App Service this uses the app's managed identity; for local development it can use the identity from `az login`. The identity needs permission to read secrets. The loader calls `getSecret` without a version, so Key Vault returns the current version of this secret. It checks that the returned string contains a PEM private-key block and a certificate block, then passes the unchanged string as both TLS `key` and `cert` values.
+
+The person-search and ID-card API clients use those values to create Node HTTPS agents. Node reads the matching private-key block from `key` and the client-certificate block(s) from `cert` during the TLS handshake. These are TLS credentials, not HTTP request headers. A PEM secret must not be supplied through the `pfx` option; that option is for a binary PKCS#12/PFX bundle.
+
+To rotate the certificate, update the Key Vault secret with the replacement PEM text, ensure the private key matches the new certificate, then restart or redeploy the app so new TLS agents load the latest secret version. Never print the secret in logs or commit it to source control. Treat any local copies of the PEM as private-key material and remove them when no longer needed.
 
 ## Azure deployment
 
