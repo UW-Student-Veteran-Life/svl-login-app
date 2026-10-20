@@ -6,7 +6,7 @@
 
 const axios = require('axios');
 const https = require('https');
-const { pfxCert } = require('./cert');
+const { tlsCredentials } = require('./cert');
 const process = require('process');
 
 const apiRoot = process.env.API_ROOT;
@@ -18,10 +18,7 @@ const apiRoot = process.env.API_ROOT;
  * @returns {Promise<string>} The reg ID for the user associated with the card
  */
 async function searchCard(cardIdentifier, identifierType) {
-  // Create an HTTPS agent with base64 encoded certificate
-  const httpsAgent = new https.Agent({
-    pfx: await pfxCert
-  });
+  const httpsAgent = new https.Agent(await tlsCredentials);
 
   const requestUrl = new URL('/idcard/v1/card.json', apiRoot);
   requestUrl.searchParams.append(identifierType, cardIdentifier);

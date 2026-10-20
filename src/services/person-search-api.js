@@ -6,7 +6,7 @@
 const axios = require('axios');
 const https = require('https');
 const process = require('process');
-const { pfxCert } = require('./cert');
+const { tlsCredentials } = require('./cert');
 const { Student } = require('../core/Student');
 
 const apiRoot = process.env.API_ROOT;
@@ -22,10 +22,7 @@ async function getStudentInfo(searchParam, type='reg_id') {
     throw new Error('Type is not of value reg_id, net_id, or student_number');
   }
 
-  // Create an HTTPS agent with base64 encoded certificate
-  const httpsAgent = new https.Agent({
-    pfx: await pfxCert
-  });
+  const httpsAgent = new https.Agent(await tlsCredentials);
 
   const requestUrl = new URL('student/v5/person.json', apiRoot);
   requestUrl.searchParams.append(type, searchParam);
