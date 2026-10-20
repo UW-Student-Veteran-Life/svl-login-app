@@ -7,7 +7,7 @@ This repository contains a kiosk-style web application for recording Student Vet
 - **Web application:** Node.js 24, Express, and static HTML/CSS/JavaScript, hosted by an Azure Linux Web App.
 - **Authentication and authorization:** Microsoft Entra ID using MSAL. Staff access to login records and option management requires the `Login.Read` app role.
 - **Database:** Azure Cosmos DB for NoSQL, with `SVL` database and `Logins` and `Options` containers.
-- **Secrets:** Azure Key Vault stores application credentials, the Cosmos DB connection string, the UW API root, and the UW API certificate secret. The web app uses its managed identity to read secrets.
+- **Secrets:** Azure Key Vault stores application credentials, the Cosmos DB connection string, the UW API root, and the UW API certificate secret. The web app uses its managed identity to read secrets. See the [certificate management guide](docs/certificate-management.md) for certificate provisioning and handling.
 - **UW services:** UW's ID Card Reader and Person Search APIs resolve card identifiers and retrieve student information. These services require a UW-issued client certificate.
 
 ## Run locally
@@ -17,7 +17,7 @@ This repository contains a kiosk-style web application for recording Student Vet
 - Node.js 24.x and npm
 - Access to the application's Azure Key Vault and Cosmos DB
 - An Azure identity that can read the required Key Vault secrets (for example, sign in with Azure CLI using `az login`)
-- A configured Microsoft Entra application and the UW API certificate described below
+- A configured Microsoft Entra application and the UW API certificate described in the [certificate management guide](docs/certificate-management.md)
 
 From the repository root:
 
@@ -68,7 +68,7 @@ The app also reads these Key Vault secrets at runtime:
 
 - `APP-SESSION-SECRET` — Express session signing secret
 - `DB-CONN` — Cosmos DB SQL API connection string
-- `svlcardreader-vetlife-washington-edu` — PEM text containing the client private key and matching certificate for UW API requests
+- `svlcardreader-vetlife-washington-edu` — PEM text containing the client private key and matching certificate for UW API requests; see the [certificate management guide](docs/certificate-management.md)
 
 The local identity needs permission to read these secrets. The Terraform deployment assigns the web app's managed identity a Key Vault role; local identities must be granted access separately.
 
@@ -88,28 +88,7 @@ Both UW services use certificate-based client authentication. The app uses the s
 - The Person Search endpoint `student/v5/person.json` retrieves student details by registration ID, UW NetID, or student number.
 - `API_ROOT` is the service root URL used to construct both API request URLs.
 
-Access to these APIs and certificates is managed by UW IT. Request an appropriate client certificate through the UW [IAM Tools Service](https://iam-tools.u.washington.edu/cs/) and confirm the service URLs and access with UW IT.
-
-### Add or update the API certificate
-
-The Key Vault secret named `svlcardreader-vetlife-washington-edu` must be a **string containing PEM text** with both the client private key and its matching certificate. The secret value should have PEM blocks in this general form (the bracketed text is illustrative, not literal):
-
-```text
------BEGIN PRIVATE KEY-----
-<base64-encoded private key data>
------END PRIVATE KEY-----
------BEGIN CERTIFICATE-----
-<base64-encoded certificate data>
------END CERTIFICATE-----
-```
-
-The private key must match the certificate. If the certificate authority supplies intermediate certificates, include the required certificate chain in PEM form after the client certificate. Do not convert this value to a PFX or base64-encode the entire PEM text: the application expects the PEM text as-is.
-
-When `cert.js` loads, it creates a Key Vault `SecretClient` using `VAULT_URI` and Azure's `DefaultAzureCredential` chain. In Azure App Service this uses the app's managed identity; for local development it can use the identity from `az login`. The identity needs permission to read secrets. The loader calls `getSecret` without a version, so Key Vault returns the current version of this secret. It checks that the returned string contains a PEM private-key block and a certificate block, then passes the unchanged string as both TLS `key` and `cert` values.
-
-The person-search and ID-card API clients use those values to create Node HTTPS agents. Node reads the matching private-key block from `key` and the client-certificate block(s) from `cert` during the TLS handshake. These are TLS credentials, not HTTP request headers. A PEM secret must not be supplied through the `pfx` option; that option is for a binary PKCS#12/PFX bundle.
-
-To rotate the certificate, update the Key Vault secret with the replacement PEM text, ensure the private key matches the new certificate, then restart or redeploy the app so new TLS agents load the latest secret version. Never print the secret in logs or commit it to source control. Treat any local copies of the PEM as private-key material and remove them when no longer needed.
+See the [certificate management guide](docs/certificate-management.md) for obtaining and securely storing the UW client certificate and configuring its Key Vault secret.
 
 ## Azure deployment
 

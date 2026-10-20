@@ -119,7 +119,7 @@ Redirect URIs must match the deployed host and application paths and must be reg
 
 ### Runtime secrets not supplied as GitHub inputs
 
-Terraform creates the Key Vault and writes the Entra app credentials, API root, app session secret, and Cosmos DB connection string into it. The web app accesses Key Vault through its system-assigned managed identity. The UW API certificate secret (`svlcardreader-vetlife-washington-edu`) is not created or populated by the Terraform configuration; provision/rotate that PEM-valued secret separately in the environment's vault. The application requires it to call the UW ID Card Reader and Person Search APIs.
+Terraform creates the Key Vault and writes the Entra app credentials, API root, app session secret, and Cosmos DB connection string into it. The web app accesses Key Vault through its system-assigned managed identity. The UW API certificate secret (`svlcardreader-vetlife-washington-edu`) is not created or populated by the Terraform configuration; provision/rotate that PEM-valued secret separately in the environment's vault. The application requires it to call the UW ID Card Reader and Person Search APIs. See the [certificate management guide](./certificate-management.md) for certificate issuance and secure handling.
 
 The app also needs the runtime Key Vault secrets and settings documented in the [README](../README.md#run-locally). A successful infrastructure Apply does not by itself verify that an out-of-band certificate secret, custom DNS, hostname binding, or TLS certificate is configured correctly.
 
@@ -136,7 +136,7 @@ The configured provider is AzureRM `5.10.0`, and Terraform is pinned to `1.16.5`
 
 The `Logins` Cosmos DB container uses the environment's `LOGIN_RECORD_TTL` value in seconds. Confirm that it matches the approved retention policy before applying. The `Options` container has no configured TTL. See [Data retention](../README.md#data-retention) for the documented environment values.
 
-Terraform does not configure DNS records, custom hostname bindings, or the App Service TLS certificate. Those remain separate environment operations; see [DNS and custom domains](../README.md#dns-and-custom-domains).
+Terraform does not configure DNS records, custom hostname bindings, or the App Service TLS certificate. Those remain separate environment operations; see [DNS and custom domains](../README.md#dns-and-custom-domains) and the [certificate management guide](./certificate-management.md).
 
 ## Operational checklist
 
